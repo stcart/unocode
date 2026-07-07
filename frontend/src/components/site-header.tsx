@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HealthCheck } from "@/components/health-check";
+import { AuthNav } from "@/components/auth-nav";
 
 export function SiteHeader() {
   return (
@@ -8,6 +8,7 @@ export function SiteHeader() {
         <Link href="/" className="text-lg font-semibold tracking-tight">
           Практика
         </Link>
+        <AuthNav />
       </div>
     </header>
   );
