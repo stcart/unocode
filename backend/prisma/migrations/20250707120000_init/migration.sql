@@ -1,0 +1,1 @@
+-- Initial empty schema (Stage 0). Models will be added in Stage 1.
