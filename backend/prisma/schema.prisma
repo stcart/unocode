@@ -6,3 +6,192 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum SurveyFieldType {
+  TEXT
+  LONG_TEXT
+  SELECT
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(STUDENT)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  applications        Application[]
+  studentDocumentData StudentDocumentData[]
+  taskCards           TaskCard[]
+
+  @@map("users")
+}
+
+model Cohort {
+  id               Int      @id @default(autoincrement())
+  name             String
+  applicationStart DateTime @map("application_start") @db.Date
+  applicationEnd   DateTime @map("application_end") @db.Date
+  practiceStart    DateTime @map("practice_start") @db.Date
+  practiceEnd      DateTime @map("practice_end") @db.Date
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  surveyFields        SurveyField[]
+  cohortRoles         CohortRole[]
+  applications        Application[]
+  testTask            TestTask?
+  studentDocumentData StudentDocumentData[]
+  taskCards           TaskCard[]
+
+  @@map("cohorts")
+}
+
+model SurveyField {
+  id        Int             @id @default(autoincrement())
+  cohortId  Int             @map("cohort_id")
+  label     String
+  type      SurveyFieldType
+  options   String[]        @default([])
+  sortOrder Int             @map("sort_order")
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  cohort  Cohort              @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  answers ApplicationAnswer[]
+
+  @@index([cohortId])
+  @@map("survey_fields")
+}
+
+model CohortRole {
+  id        Int      @id @default(autoincrement())
+  cohortId  Int      @map("cohort_id")
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  cohort       Cohort        @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@index([cohortId])
+  @@map("cohort_roles")
+}
+
+model Application {
+  id             Int               @id @default(autoincrement())
+  userId         Int               @map("user_id")
+  cohortId       Int               @map("cohort_id")
+  status         ApplicationStatus @default(PENDING)
+  reviewComment  String?           @map("review_comment")
+  roleId         Int?              @map("role_id")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cohort  Cohort              @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  role    CohortRole?         @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  answers ApplicationAnswer[]
+
+  @@unique([userId, cohortId])
+  @@index([cohortId])
+  @@index([userId])
+  @@index([status])
+  @@map("applications")
+}
+
+model ApplicationAnswer {
+  id            Int      @id @default(autoincrement())
+  applicationId Int      @map("application_id")
+  surveyFieldId Int      @map("survey_field_id")
+  value         String
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  surveyField SurveyField @relation(fields: [surveyFieldId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, surveyFieldId])
+  @@index([surveyFieldId])
+  @@map("application_answers")
+}
+
+model TestTask {
+  id          Int       @id @default(autoincrement())
+  cohortId    Int       @unique @map("cohort_id")
+  content     String
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@map("test_tasks")
+}
+
+model StudentDocumentData {
+  id        Int @id @default(autoincrement())
+  userId    Int @map("user_id")
+  cohortId  Int @map("cohort_id")
+
+  studentFio    String? @map("student_fio")
+  group         String? @map("group")
+  directionCode String? @map("direction_code")
+  directionName String? @map("direction_name")
+  programName   String? @map("program_name")
+  specialty     String?
+  practiceTopic String? @map("practice_topic")
+  mainStageTasks String? @map("main_stage_tasks")
+
+  reviewActivities      String? @map("review_activities")
+  reviewCharacteristic  String? @map("review_characteristic")
+  reviewEmployed        String? @map("review_employed")
+  reviewNextPractice    String? @map("review_next_practice")
+  reviewEmploymentOffer String? @map("review_employment_offer")
+  reviewSuggestions     String? @map("review_suggestions")
+  reviewGrade           String? @map("review_grade")
+
+  reportFileUrl        String? @map("report_file_url")
+  reportAdminApproved  Boolean @default(false) @map("report_admin_approved")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cohortId])
+  @@index([cohortId])
+  @@map("student_document_data")
+}
+
+model TaskCard {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  cohortId     Int      @map("cohort_id")
+  date         DateTime @db.Date
+  title        String?
+  description  String?
+  artifactLink String?  @map("artifact_link")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@index([cohortId, date])
+  @@index([userId, cohortId])
+  @@map("task_cards")
+}
