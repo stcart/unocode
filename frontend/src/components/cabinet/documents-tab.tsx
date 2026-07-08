@@ -238,6 +238,12 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
       return;
     }
 
+    const lowerName = file.name.toLowerCase();
+    if (!lowerName.endsWith(".pdf") && !lowerName.endsWith(".docx")) {
+      setError("Допустимы только файлы .docx и .pdf");
+      return;
+    }
+
     setIsUploading(true);
     setError(null);
 
@@ -435,10 +441,8 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
               <div>
                 <Input
                   type="file"
-                  accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  disabled={
-                    isUploading || context.applicationStatus !== "APPROVED"
-                  }
+                  accept=".docx,.pdf"
+                  disabled={isUploading || context.applicationStatus !== "APPROVED"}
                   onChange={(event) => {
                     const file = event.target.files?.[0];
                     if (file) {
@@ -447,6 +451,11 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
                     }
                   }}
                 />
+                {isUploading && (
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    Загрузка отчёта...
+                  </p>
+                )}
                 {context.applicationStatus !== "APPROVED" && (
                   <p className="text-muted-foreground mt-2 text-sm">
                     Загрузка отчёта доступна после одобрения заявки.

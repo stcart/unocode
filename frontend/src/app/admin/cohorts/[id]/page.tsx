@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminRoute } from "@/components/admin-route";
+import { AdminApplicationsTab } from "@/components/admin/applications-tab";
+import { AdminDocumentsTab } from "@/components/admin/documents-tab";
+import { AdminTasksTab } from "@/components/admin/tasks-tab";
 import { CohortForm } from "@/components/admin/cohort-form";
 import { CohortRolesEditor } from "@/components/admin/cohort-roles-editor";
 import { SurveyFieldsEditor } from "@/components/admin/survey-fields-editor";
@@ -98,102 +101,128 @@ function CohortDetailPageContent() {
         </p>
       </div>
 
-      <Tabs defaultValue="settings">
-        <TabsList>
-          <TabsTrigger value="settings">Настройки</TabsTrigger>
-          <TabsTrigger value="survey">Анкета</TabsTrigger>
-          <TabsTrigger value="roles">Роли</TabsTrigger>
-          <TabsTrigger value="test-task">Тестовое</TabsTrigger>
+      <Tabs defaultValue="applications">
+        <TabsList className="flex h-auto flex-wrap">
+          <TabsTrigger value="applications">Заявки</TabsTrigger>
+          <TabsTrigger value="documents">Документы</TabsTrigger>
+          <TabsTrigger value="tasks">Задачи</TabsTrigger>
+          <TabsTrigger value="cohort">Управление когортой</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Основные параметры</CardTitle>
-              <CardDescription>
-                Даты приёма заявок и сроки практики используются в документах и
-                модуле задач.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CohortForm
-                initialValues={{
-                  name: cohort.name,
-                  applicationStart: cohort.applicationStart,
-                  applicationEnd: cohort.applicationEnd,
-                  practiceStart: cohort.practiceStart,
-                  practiceEnd: cohort.practiceEnd,
-                }}
-                submitLabel="Сохранить изменения"
-                onSubmit={async (values) => {
-                  const { cohort: updatedCohort } = await updateCohort(
-                    cohort.id,
-                    values
-                  );
-                  setCohort(updatedCohort);
-                }}
-              />
-            </CardContent>
-          </Card>
+        <TabsContent value="applications">
+          <AdminApplicationsTab
+            cohortId={cohort.id}
+            roles={cohort.cohortRoles}
+          />
         </TabsContent>
 
-        <TabsContent value="survey">
-          <Card>
-            <CardHeader>
-              <CardTitle>Конструктор анкеты</CardTitle>
-              <CardDescription>
-                Поля анкеты для кандидатов этой когорты.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SurveyFieldsEditor
-                cohortId={cohort.id}
-                fields={cohort.surveyFields}
-                onChange={(surveyFields) =>
-                  setCohort({ ...cohort, surveyFields })
-                }
-              />
-            </CardContent>
-          </Card>
+        <TabsContent value="documents">
+          <AdminDocumentsTab cohortId={cohort.id} />
         </TabsContent>
 
-        <TabsContent value="roles">
-          <Card>
-            <CardHeader>
-              <CardTitle>Роли / треки</CardTitle>
-              <CardDescription>
-                Список направлений, которые админ сможет назначать после одобрения
-                заявки.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CohortRolesEditor
-                cohortId={cohort.id}
-                roles={cohort.cohortRoles}
-                onChange={(cohortRoles) =>
-                  setCohort({ ...cohort, cohortRoles })
-                }
-              />
-            </CardContent>
-          </Card>
+        <TabsContent value="tasks">
+          <AdminTasksTab />
         </TabsContent>
 
-        <TabsContent value="test-task">
-          <Card>
-            <CardHeader>
-              <CardTitle>Тестовое задание</CardTitle>
-              <CardDescription>
-                Текст задания и управление публикацией для кандидатов.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TestTaskEditor
-                cohortId={cohort.id}
-                testTask={cohort.testTask}
-                onChange={(testTask) => setCohort({ ...cohort, testTask })}
-              />
-            </CardContent>
-          </Card>
+        <TabsContent value="cohort">
+          <Tabs defaultValue="settings">
+            <TabsList>
+              <TabsTrigger value="settings">Настройки</TabsTrigger>
+              <TabsTrigger value="survey">Анкета</TabsTrigger>
+              <TabsTrigger value="roles">Роли</TabsTrigger>
+              <TabsTrigger value="test-task">Тестовое</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Основные параметры</CardTitle>
+                  <CardDescription>
+                    Даты приёма заявок и сроки практики используются в документах
+                    и модуле задач.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <CohortForm
+                    initialValues={{
+                      name: cohort.name,
+                      applicationStart: cohort.applicationStart,
+                      applicationEnd: cohort.applicationEnd,
+                      practiceStart: cohort.practiceStart,
+                      practiceEnd: cohort.practiceEnd,
+                    }}
+                    submitLabel="Сохранить изменения"
+                    onSubmit={async (values) => {
+                      const { cohort: updatedCohort } = await updateCohort(
+                        cohort.id,
+                        values
+                      );
+                      setCohort(updatedCohort);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="survey">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Конструктор анкеты</CardTitle>
+                  <CardDescription>
+                    Поля анкеты для кандидатов этой когорты.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SurveyFieldsEditor
+                    cohortId={cohort.id}
+                    fields={cohort.surveyFields}
+                    onChange={(surveyFields) =>
+                      setCohort({ ...cohort, surveyFields })
+                    }
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="roles">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Роли / треки</CardTitle>
+                  <CardDescription>
+                    Список направлений, которые админ назначает после одобрения
+                    заявки.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <CohortRolesEditor
+                    cohortId={cohort.id}
+                    roles={cohort.cohortRoles}
+                    onChange={(cohortRoles) =>
+                      setCohort({ ...cohort, cohortRoles })
+                    }
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="test-task">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Тестовое задание</CardTitle>
+                  <CardDescription>
+                    Текст задания и управление публикацией для кандидатов.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <TestTaskEditor
+                    cohortId={cohort.id}
+                    testTask={cohort.testTask}
+                    onChange={(testTask) => setCohort({ ...cohort, testTask })}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>

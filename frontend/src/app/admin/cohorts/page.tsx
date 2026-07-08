@@ -46,7 +46,7 @@ function CohortsPageContent() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Когорты</h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Управление потоками практики, анкетами, ролями и тестовыми заданиями.
+            Выберите когорту для работы с заявками, документами и задачами.
           </p>
         </div>
         <Link href="/admin/cohorts/new" className={cn(buttonVariants())}>
@@ -103,7 +103,7 @@ function CohortsPageContent() {
                     href={`/admin/cohorts/${cohort.id}`}
                     className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
                   >
-                    Настроить
+                    Открыть
                   </Link>
                 </TableCell>
               </TableRow>

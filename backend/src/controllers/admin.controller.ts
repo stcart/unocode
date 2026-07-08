@@ -1,5 +1,18 @@
 import type { Request, Response } from "express";
 import {
+  getCohortApplication,
+  listCohortApplications,
+  reviewCohortApplication,
+} from "../services/admin-application.service";
+import {
+  getCohortStudentDocument,
+  getReportFile,
+  listCohortDocuments,
+  saveAdminReview,
+  setReportApproval,
+  type AdminReviewInput,
+} from "../services/admin-document.service";
+import {
   createCohort,
   getCohortById,
   listCohorts,
@@ -29,7 +42,7 @@ import {
   parseEntityId,
   type CohortInput,
 } from "../utils/cohort-validation";
-import type { SurveyFieldType } from "@prisma/client";
+import type { ApplicationStatus, SurveyFieldType } from "@prisma/client";
 
 export async function getCohorts(_req: Request, res: Response): Promise<void> {
   const cohorts = await listCohorts();
@@ -203,4 +216,109 @@ export async function postUnpublishTestTask(
   const cohortId = parseCohortId(req.params.cohortId);
   const testTask = await unpublishTestTask(cohortId);
   res.json({ testTask });
+}
+
+export async function getCohortApplications(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cohortId = parseCohortId(req.params.cohortId);
+  const applications = await listCohortApplications(cohortId);
+  res.json({ applications });
+}
+
+export async function getCohortApplicationById(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cohortId = parseCohortId(req.params.cohortId);
+  const applicationId = parseEntityId(req.params.applicationId, "applicationId");
+  const application = await getCohortApplication(cohortId, applicationId);
+  res.json({ application });
+}
+
+export async function patchCohortApplication(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cohortId = parseCohortId(req.params.cohortId);
+  const applicationId = parseEntityId(req.params.applicationId, "applicationId");
+  const body = req.body as {
+    status?: ApplicationStatus;
+    reviewComment?: string | null;
+    roleId?: number | null;
+  };
+
+  const application = await reviewCohortApplication(
+    cohortId,
+    applicationId,
+    body
+  );
+
+  res.json({ application });
+}
+
+export async function getCohortDocumentsList(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cohortId = parseCohortId(req.params.cohortId);
+  const students = await listCohortDocuments(cohortId);
+  res.json({ students });
+}
+
+export async function getCohortStudentDocumentByUser(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cohortId = parseCohortId(req.params.cohortId);
+  const userId = parseEntityId(req.params.userId, "userId");
+  const student = await getCohortStudentDocument(cohortId, userId);
+  res.json(student);
+}
+
+export async function putCohortStudentReview(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cohortId = parseCohortId(req.params.cohortId);
+  const userId = parseEntityId(req.params.userId, "userId");
+  const data = await saveAdminReview(
+    cohortId,
+    userId,
+    req.body as AdminReviewInput
+  );
+  res.json({ data });
+}
+
+export async function patchCohortReportApproval(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cohortId = parseCohortId(req.params.cohortId);
+  const userId = parseEntityId(req.params.userId, "userId");
+  const body = req.body as { approved?: boolean };
+
+  if (typeof body.approved !== "boolean") {
+    throw new AppError(400, "approved обязателен");
+  }
+
+  const data = await setReportApproval(cohortId, userId, body.approved);
+  res.json({ data });
+}
+
+export async function getCohortStudentReport(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cohortId = parseCohortId(req.params.cohortId);
+  const userId = parseEntityId(req.params.userId, "userId");
+  const { buffer, filename, mimeType } = await getReportFile(cohortId, userId);
+
+  res.setHeader("Content-Type", mimeType);
+  res.setHeader(
+    "Content-Disposition",
+    `inline; filename*=UTF-8''${encodeURIComponent(filename)}`
+  );
+  res.send(buffer);
 }

@@ -1,16 +1,24 @@
 import { Router } from "express";
 import {
   getCohort,
-  getCohorts,
+  getCohortApplicationById,
+  getCohortApplications,
+  getCohortDocumentsList,
+  getCohortStudentDocumentByUser,
+  getCohortStudentReport,
   getCohortTestTask,
+  getCohorts,
   getRoles,
   getSurveyFields,
+  patchCohortApplication,
+  patchCohortReportApproval,
   postCohort,
   postPublishTestTask,
   postRole,
   postSurveyField,
   postUnpublishTestTask,
   putCohort,
+  putCohortStudentReview,
   putCohortTestTask,
   putRole,
   putSurveyField,
@@ -73,6 +81,40 @@ router.post(
 router.post(
   "/admin/cohorts/:cohortId/test-task/unpublish",
   asyncHandler(postUnpublishTestTask)
+);
+
+router.get(
+  "/admin/cohorts/:cohortId/applications",
+  asyncHandler(getCohortApplications)
+);
+router.get(
+  "/admin/cohorts/:cohortId/applications/:applicationId",
+  asyncHandler(getCohortApplicationById)
+);
+router.patch(
+  "/admin/cohorts/:cohortId/applications/:applicationId",
+  asyncHandler(patchCohortApplication)
+);
+
+router.get(
+  "/admin/cohorts/:cohortId/documents",
+  asyncHandler(getCohortDocumentsList)
+);
+router.get(
+  "/admin/cohorts/:cohortId/documents/:userId",
+  asyncHandler(getCohortStudentDocumentByUser)
+);
+router.put(
+  "/admin/cohorts/:cohortId/documents/:userId/review",
+  asyncHandler(putCohortStudentReview)
+);
+router.patch(
+  "/admin/cohorts/:cohortId/documents/:userId/report-approval",
+  asyncHandler(patchCohortReportApproval)
+);
+router.get(
+  "/admin/cohorts/:cohortId/documents/:userId/report",
+  asyncHandler(getCohortStudentReport)
 );
 
 export default router;

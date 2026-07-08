@@ -460,6 +460,11 @@ export async function saveReportFile(
   }
 
   const ext = path.extname(file.originalname).toLowerCase();
+
+  if (ext !== ".pdf" && ext !== ".docx") {
+    throw new AppError(400, "Допустимы только файлы .docx и .pdf");
+  }
+
   const targetDir = path.join(uploadsDir, String(cohortId), String(userId));
   fs.mkdirSync(targetDir, { recursive: true });
 

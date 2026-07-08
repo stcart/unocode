@@ -1,4 +1,12 @@
-import { apiFetch } from "@/lib/api";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
+import { getToken } from "@/lib/auth-storage";
+import type {
+  AdminApplication,
+  AdminDocumentStudent,
+  AdminReviewInput,
+  AdminStudentDocumentDetail,
+  ReviewApplicationInput,
+} from "@/lib/types/admin";
 import type {
   CohortDetail,
   CohortInput,
@@ -122,4 +130,96 @@ export async function unpublishTestTask(
   return apiFetch(`/admin/cohorts/${cohortId}/test-task/unpublish`, {
     method: "POST",
   }, true);
+}
+
+export async function fetchCohortApplications(
+  cohortId: number
+): Promise<{ applications: AdminApplication[] }> {
+  return apiFetch(`/admin/cohorts/${cohortId}/applications`, {}, true);
+}
+
+export async function reviewApplication(
+  cohortId: number,
+  applicationId: number,
+  input: ReviewApplicationInput
+): Promise<{ application: AdminApplication }> {
+  return apiFetch(
+    `/admin/cohorts/${cohortId}/applications/${applicationId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    },
+    true
+  );
+}
+
+export async function fetchCohortDocuments(
+  cohortId: number
+): Promise<{ students: AdminDocumentStudent[] }> {
+  return apiFetch(`/admin/cohorts/${cohortId}/documents`, {}, true);
+}
+
+export async function fetchStudentDocument(
+  cohortId: number,
+  userId: number
+): Promise<AdminStudentDocumentDetail> {
+  return apiFetch(`/admin/cohorts/${cohortId}/documents/${userId}`, {}, true);
+}
+
+export async function saveStudentReview(
+  cohortId: number,
+  userId: number,
+  input: AdminReviewInput
+): Promise<{ data: AdminStudentDocumentDetail["data"] }> {
+  return apiFetch(
+    `/admin/cohorts/${cohortId}/documents/${userId}/review`,
+    {
+      method: "PUT",
+      body: JSON.stringify(input),
+    },
+    true
+  );
+}
+
+export async function setReportApproval(
+  cohortId: number,
+  userId: number,
+  approved: boolean
+): Promise<{ data: AdminStudentDocumentDetail["data"] }> {
+  return apiFetch(
+    `/admin/cohorts/${cohortId}/documents/${userId}/report-approval`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ approved }),
+    },
+    true
+  );
+}
+
+export function getStudentReportUrl(cohortId: number, userId: number): string {
+  return `${API_BASE_URL}/admin/cohorts/${cohortId}/documents/${userId}/report`;
+}
+
+export async function openStudentReport(
+  cohortId: number,
+  userId: number
+): Promise<void> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error("Требуется авторизация");
+  }
+
+  const response = await fetch(getStudentReportUrl(cohortId, userId), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    throw new Error("Не удалось открыть отчёт");
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank", "noopener,noreferrer");
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
