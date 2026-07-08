@@ -9,16 +9,14 @@ export default function Home() {
         </h1>
         <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
           Веб-сервис для организации приёма студентов на практику, ведения
-          заявок, документооборота и контроля задач. Этап 2: регистрация и
-          авторизация готовы — можно{" "}
-          <a href="/register" className="text-foreground underline-offset-4 hover:underline">
-            зарегистрироваться
-          </a>{" "}
-          или{" "}
-          <a href="/login" className="text-foreground underline-offset-4 hover:underline">
-            войти
+          заявок, документооборота и контроля задач. Этап 3: админ может{" "}
+          <a
+            href="/admin/cohorts"
+            className="text-foreground underline-offset-4 hover:underline"
+          >
+            управлять когортами
           </a>
-          .
+          , анкетами, ролями и тестовыми заданиями.
         </p>
       </section>
 

@@ -41,7 +41,7 @@ model User {
 
 model Cohort {
   id               Int      @id @default(autoincrement())
-  name             String
+  name             String   @unique
   applicationStart DateTime @map("application_start") @db.Date
   applicationEnd   DateTime @map("application_end") @db.Date
   practiceStart    DateTime @map("practice_start") @db.Date

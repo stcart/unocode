@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+
 export function AuthNav() {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
@@ -16,6 +17,14 @@ export function AuthNav() {
   if (user) {
     return (
       <div className="ml-auto flex items-center gap-3">
+        {user.role === "ADMIN" && (
+          <Link
+            href="/admin/cohorts"
+            className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+          >
+            Админ
+          </Link>
+        )}
         <Link
           href="/profile"
           className="text-muted-foreground hover:text-foreground text-sm transition-colors"
@@ -51,4 +60,5 @@ export function AuthNav() {
         Регистрация
       </Link>
     </div>
-  );}
+  );
+}
