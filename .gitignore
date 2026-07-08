@@ -31,3 +31,6 @@ Thumbs.db
 
 # Testing
 coverage/
+
+# Uploaded reports (generated at runtime)
+backend/uploads/

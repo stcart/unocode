@@ -26,10 +26,10 @@ export function AuthNav() {
           </Link>
         )}
         <Link
-          href="/profile"
+          href="/cabinet"
           className="text-muted-foreground hover:text-foreground text-sm transition-colors"
         >
-          {user.email}
+          Кабинет
         </Link>
         <Button
           variant="outline"

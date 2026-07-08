@@ -25,7 +25,7 @@ function getSafeReturnUrl(value: string | null): string {
     return value;
   }
 
-  return "/profile";
+  return "/cabinet";
 }
 
 export function AuthForm({ mode }: AuthFormProps) {

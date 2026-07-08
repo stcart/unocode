@@ -15,7 +15,7 @@ export function AdminRoute({ children }: { children: ReactNode }) {
     }
 
     if (!isLoading && user && user.role !== "ADMIN") {
-      router.replace("/profile");
+      router.replace("/cabinet");
     }
   }, [isLoading, user, router]);
 

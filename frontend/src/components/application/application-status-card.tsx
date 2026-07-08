@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApplicationStatus } from "@/lib/types/application";
+import { applicationStatusVariants } from "@/lib/application-status";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -10,14 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const statusVariants: Record<
-  ApplicationStatus,
-  "default" | "secondary" | "destructive"
-> = {
-  PENDING: "secondary",
-  APPROVED: "default",
-  REJECTED: "destructive",
-};
+const statusVariants = applicationStatusVariants;
 
 type ApplicationStatusCardProps = {
   status: ApplicationStatus;

@@ -9,10 +9,15 @@ export default function Home() {
         </h1>
         <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
           Веб-сервис для организации приёма студентов на практику, ведения
-          заявок, документооборота и контроля задач. Этап 4: кандидаты могут
-          подать заявку по публичной ссылке{" "}
-          <code className="text-sm">/apply/[id]</code> (ссылка есть в настройках
-          когорты у админа).
+          заявок, документооборота и контроля задач. Этап 5: у практикантов
+          есть{" "}
+          <a
+            href="/cabinet"
+            className="text-foreground underline-offset-4 hover:underline"
+          >
+            личный кабинет
+          </a>{" "}
+          с вкладками «Заявки», «Документы» и «Задачи».
         </p>
       </section>
 

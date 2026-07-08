@@ -12,6 +12,11 @@ export function errorHandler(
     return;
   }
 
+  if (err instanceof Error && err.message.startsWith("Допустимы только")) {
+    res.status(400).json({ error: err.message });
+    return;
+  }
+
   console.error(err);
 
   res.status(500).json({
