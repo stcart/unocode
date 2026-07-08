@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -20,15 +20,26 @@ type AuthFormProps = {
   mode: "login" | "register";
 };
 
+function getSafeReturnUrl(value: string | null): string {
+  if (value && value.startsWith("/") && !value.startsWith("//")) {
+    return value;
+  }
+
+  return "/profile";
+}
+
 export function AuthForm({ mode }: AuthFormProps) {
   const { login, register } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = getSafeReturnUrl(searchParams.get("returnUrl"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isLogin = mode === "login";
+  const alternateHref = `${isLogin ? "/register" : "/login"}?returnUrl=${encodeURIComponent(returnUrl)}`;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -42,7 +53,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         await register(email, password);
       }
 
-      router.push("/profile");
+      router.push(returnUrl);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Что-то пошло не так");
     } finally {
@@ -101,7 +112,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <p className="text-muted-foreground mt-4 text-sm">
           {isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?"}{" "}
           <Link
-            href={isLogin ? "/register" : "/login"}
+            href={alternateHref}
             className="text-foreground underline-offset-4 hover:underline"
           >
             {isLogin ? "Зарегистрироваться" : "Войти"}

@@ -9,14 +9,10 @@ export default function Home() {
         </h1>
         <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
           Веб-сервис для организации приёма студентов на практику, ведения
-          заявок, документооборота и контроля задач. Этап 3: админ может{" "}
-          <a
-            href="/admin/cohorts"
-            className="text-foreground underline-offset-4 hover:underline"
-          >
-            управлять когортами
-          </a>
-          , анкетами, ролями и тестовыми заданиями.
+          заявок, документооборота и контроля задач. Этап 4: кандидаты могут
+          подать заявку по публичной ссылке{" "}
+          <code className="text-sm">/apply/[id]</code> (ссылка есть в настройках
+          когорты у админа).
         </p>
       </section>
 

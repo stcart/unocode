@@ -88,7 +88,13 @@ function CohortDetailPageContent() {
           </Badge>
         </div>
         <p className="text-muted-foreground text-sm">
-          Публичная ссылка на анкету будет доступна на Этапе 4.
+          Публичная ссылка на анкету:{" "}
+          <Link
+            href={`/apply/${cohort.id}`}
+            className="text-foreground underline-offset-4 hover:underline"
+          >
+            /apply/{cohort.id}
+          </Link>
         </p>
       </div>
 
