@@ -36,6 +36,7 @@ import {
   unpublishTestTask,
   upsertTestTask,
 } from "../services/test-task.service";
+import { getAdminTaskBoard } from "../services/task.service";
 import { AppError } from "../utils/app-error";
 import {
   parseCohortId,
@@ -321,4 +322,24 @@ export async function getCohortStudentReport(
     `inline; filename*=UTF-8''${encodeURIComponent(filename)}`
   );
   res.send(buffer);
+}
+
+function parseWeekStart(value: unknown): string | undefined {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return undefined;
+  }
+
+  return value;
+}
+
+export async function getCohortTasks(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const cohortId = parseCohortId(req.params.cohortId);
+  const board = await getAdminTaskBoard(
+    cohortId,
+    parseWeekStart(req.query.weekStart)
+  );
+  res.json(board);
 }

@@ -121,7 +121,7 @@ function CohortDetailPageContent() {
         </TabsContent>
 
         <TabsContent value="tasks">
-          <AdminTasksTab />
+          <AdminTasksTab cohortId={cohort.id} />
         </TabsContent>
 
         <TabsContent value="cohort">

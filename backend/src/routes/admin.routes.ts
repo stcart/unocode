@@ -6,6 +6,7 @@ import {
   getCohortDocumentsList,
   getCohortStudentDocumentByUser,
   getCohortStudentReport,
+  getCohortTasks,
   getCohortTestTask,
   getCohorts,
   getRoles,
@@ -115,6 +116,11 @@ router.patch(
 router.get(
   "/admin/cohorts/:cohortId/documents/:userId/report",
   asyncHandler(getCohortStudentReport)
+);
+
+router.get(
+  "/admin/cohorts/:cohortId/tasks",
+  asyncHandler(getCohortTasks)
 );
 
 export default router;

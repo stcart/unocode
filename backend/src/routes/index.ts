@@ -5,6 +5,7 @@ import authRoutes from "./auth.routes";
 import documentRoutes from "./document.routes";
 import healthRoutes from "./health.routes";
 import publicRoutes from "./public.routes";
+import taskRoutes from "./task.routes";
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.use(publicRoutes);
 router.use(authRoutes);
 router.use(applicationRoutes);
 router.use(documentRoutes);
+router.use(taskRoutes);
 router.use(adminRoutes);
 
 export default router;

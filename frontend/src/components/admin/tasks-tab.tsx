@@ -1,26 +1,11 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+"use client";
 
-export function AdminTasksTab() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Задачи и прогресс</CardTitle>
-        <CardDescription>
-          Сетка задач по неделям будет реализована на Этапе 8.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground text-sm">
-          Здесь админ увидит карточки задач всех практикантов когорты — без
-          переключателя «Показать всех», как в личном кабинете студента.
-        </p>
-      </CardContent>
-    </Card>
-  );
+import { TaskBoardView } from "@/components/tasks/task-board";
+
+type AdminTasksTabProps = {
+  cohortId: number;
+};
+
+export function AdminTasksTab({ cohortId }: AdminTasksTabProps) {
+  return <TaskBoardView mode="admin" cohortId={cohortId} />;
 }
