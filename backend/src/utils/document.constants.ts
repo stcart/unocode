@@ -11,7 +11,6 @@ export const DOCUMENT_STATIC_FIELDS = {
   schedule_final_stage:
     "заключительный этап: оформление отчёта, подготовка материалов к защите",
   supervisor_company: "Езуб Антон Сергеевич",
-  supervisor_university: "Корнякова Елена Михайловна",
 } as const;
 
 export const DOCUMENT_TYPES = [

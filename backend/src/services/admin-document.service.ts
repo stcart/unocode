@@ -30,6 +30,7 @@ function toStudentDocumentFields(data: {
   specialty: string | null;
   practiceTopic: string | null;
   mainStageTasks: string | null;
+  supervisorUrfuName: string | null;
   reviewActivities: string | null;
   reviewCharacteristic: string | null;
   reviewEmployed: string | null;
@@ -49,6 +50,7 @@ function toStudentDocumentFields(data: {
     specialty: data.specialty,
     practiceTopic: data.practiceTopic,
     mainStageTasks: data.mainStageTasks,
+    supervisorUrfuName: data.supervisorUrfuName,
     reviewActivities: data.reviewActivities,
     reviewCharacteristic: data.reviewCharacteristic,
     reviewEmployed: data.reviewEmployed,
@@ -85,6 +87,7 @@ function serializeDocumentData(data: {
   specialty: string | null;
   practiceTopic: string | null;
   mainStageTasks: string | null;
+  supervisorUrfuName: string | null;
   reviewActivities: string | null;
   reviewCharacteristic: string | null;
   reviewEmployed: string | null;
@@ -127,6 +130,7 @@ function serializeDocumentData(data: {
     specialty: data.specialty,
     practiceTopic: data.practiceTopic,
     mainStageTasks: data.mainStageTasks,
+    supervisorUrfuName: data.supervisorUrfuName,
     reviewActivities: data.reviewActivities,
     reviewCharacteristic: data.reviewCharacteristic,
     reviewEmployed: data.reviewEmployed,
@@ -213,6 +217,7 @@ export async function listCohortDocuments(cohortId: number) {
           specialty: null,
           practiceTopic: null,
           mainStageTasks: null,
+          supervisorUrfuName: null,
           reviewActivities: null,
           reviewCharacteristic: null,
           reviewEmployed: null,

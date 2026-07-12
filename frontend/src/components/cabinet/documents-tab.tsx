@@ -50,6 +50,7 @@ type FormState = {
   specialty: string;
   practiceTopic: string;
   mainStageTasks: string;
+  supervisorUrfuName: string;
 };
 
 const EMPTY_FORM: FormState = {
@@ -61,6 +62,7 @@ const EMPTY_FORM: FormState = {
   specialty: "",
   practiceTopic: "",
   mainStageTasks: "",
+  supervisorUrfuName: "",
 };
 
 function dataToForm(data: DocumentContext["data"]): FormState {
@@ -73,6 +75,7 @@ function dataToForm(data: DocumentContext["data"]): FormState {
     specialty: data.specialty ?? "",
     practiceTopic: data.practiceTopic ?? "",
     mainStageTasks: data.mainStageTasks ?? "",
+    supervisorUrfuName: data.supervisorUrfuName ?? "",
   };
 }
 
@@ -86,6 +89,7 @@ function formToInput(form: FormState): StudentDocumentInput {
     specialty: form.specialty,
     practiceTopic: form.practiceTopic,
     mainStageTasks: form.mainStageTasks,
+    supervisorUrfuName: form.supervisorUrfuName,
   };
 }
 
@@ -105,6 +109,10 @@ const FIELD_CONFIG: Array<{
     key: "mainStageTasks",
     label: "Перечень работ основного этапа",
     multiline: true,
+  },
+  {
+    key: "supervisorUrfuName",
+    label: "Руководитель практики от УрФУ",
   },
 ];
 

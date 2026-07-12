@@ -154,6 +154,7 @@ model StudentDocumentData {
   specialty     String?
   practiceTopic String? @map("practice_topic")
   mainStageTasks String? @map("main_stage_tasks")
+  supervisorUrfuName String? @map("supervisor_urfu_name")
 
   reviewActivities      String? @map("review_activities")
   reviewCharacteristic  String? @map("review_characteristic")

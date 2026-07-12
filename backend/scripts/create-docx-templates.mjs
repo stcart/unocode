@@ -46,26 +46,7 @@ function createDocx(filename, lines) {
 
 fs.mkdirSync(templatesDir, { recursive: true });
 
-createDocx("individual-task.docx", [
-  "ИНДИВИДУАЛЬНОЕ ЗАДАНИЕ",
-  "Институт: {{institute}}",
-  "Кафедра: {{department}}",
-  "Студент: {{student_fio}}, группа {{group}}",
-  "Направление: {{direction_code}} {{direction_name}}",
-  "Программа: {{program_name}}",
-  "Место практики: {{practice_place}}",
-  "Вид практики: {{practice_type}}",
-  "Тип практики: {{practice_kind}}",
-  "Период: {{practice_start}} — {{practice_end}}",
-  "Тема: {{practice_topic}}",
-  "Содержание отчёта: {{report_contents}}",
-  "Организационный этап: {{schedule_org_stage}}",
-  "Заключительный этап: {{schedule_final_stage}}",
-  "Основной этап: {{main_stage_tasks}}",
-  "Руководитель от предприятия: {{supervisor_company}}",
-  "Руководитель от УрФУ: {{supervisor_university}}",
-  "{{city_year}}",
-]);
+// individual-task.docx — реальный шаблон УрФУ, не перезаписываем
 
 createDocx("review.docx", [
   "ОТЗЫВ О ПРАКТИКЕ",

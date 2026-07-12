@@ -10,6 +10,7 @@ export type StudentDocumentFields = {
   specialty: string | null;
   practiceTopic: string | null;
   mainStageTasks: string | null;
+  supervisorUrfuName: string | null;
   reviewActivities: string | null;
   reviewCharacteristic: string | null;
   reviewEmployed: string | null;
@@ -40,6 +41,7 @@ const STUDENT_FIELD_LABELS: Record<string, string> = {
   specialty: "Специальность",
   practiceTopic: "Тема практики",
   mainStageTasks: "Перечень работ основного этапа",
+  supervisorUrfuName: "Руководитель практики от УрФУ",
 };
 
 const REQUIRED_STUDENT_FIELDS: Record<DocumentType, (keyof StudentDocumentFields)[]> =
@@ -52,6 +54,7 @@ const REQUIRED_STUDENT_FIELDS: Record<DocumentType, (keyof StudentDocumentFields
       "programName",
       "practiceTopic",
       "mainStageTasks",
+      "supervisorUrfuName",
     ],
     review: ["studentFio", "group"],
     "title-page": ["studentFio", "group", "specialty", "practiceTopic"],

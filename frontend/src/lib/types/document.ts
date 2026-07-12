@@ -24,6 +24,7 @@ export type StudentDocumentData = {
   specialty: string | null;
   practiceTopic: string | null;
   mainStageTasks: string | null;
+  supervisorUrfuName: string | null;
   reviewActivities: string | null;
   reviewCharacteristic: string | null;
   reviewEmployed: string | null;
@@ -46,6 +47,7 @@ export type StudentDocumentInput = {
   specialty?: string | null;
   practiceTopic?: string | null;
   mainStageTasks?: string | null;
+  supervisorUrfuName?: string | null;
 };
 
 export type CanGenerateResult = {

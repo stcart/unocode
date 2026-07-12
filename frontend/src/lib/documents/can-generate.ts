@@ -14,6 +14,7 @@ const STUDENT_FIELD_LABELS: Record<string, string> = {
   specialty: "Специальность",
   practiceTopic: "Тема практики",
   mainStageTasks: "Перечень работ основного этапа",
+  supervisorUrfuName: "Руководитель практики от УрФУ",
 };
 
 const REQUIRED_STUDENT_FIELDS: Record<
@@ -28,6 +29,7 @@ const REQUIRED_STUDENT_FIELDS: Record<
     "programName",
     "practiceTopic",
     "mainStageTasks",
+    "supervisorUrfuName",
   ],
   review: ["studentFio", "group"],
   "title-page": ["studentFio", "group", "specialty", "practiceTopic"],

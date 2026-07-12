@@ -30,6 +30,7 @@ export type StudentDocumentInput = {
   specialty?: string | null;
   practiceTopic?: string | null;
   mainStageTasks?: string | null;
+  supervisorUrfuName?: string | null;
 };
 
 const STUDENT_EDITABLE_FIELDS: (keyof StudentDocumentInput)[] = [
@@ -41,6 +42,7 @@ const STUDENT_EDITABLE_FIELDS: (keyof StudentDocumentInput)[] = [
   "specialty",
   "practiceTopic",
   "mainStageTasks",
+  "supervisorUrfuName",
 ];
 
 const projectRoot = path.join(__dirname, "..", "..");
@@ -68,6 +70,7 @@ function serializeDocumentData(data: {
   specialty: string | null;
   practiceTopic: string | null;
   mainStageTasks: string | null;
+  supervisorUrfuName: string | null;
   reviewActivities: string | null;
   reviewCharacteristic: string | null;
   reviewEmployed: string | null;
@@ -92,6 +95,7 @@ function serializeDocumentData(data: {
     specialty: data.specialty,
     practiceTopic: data.practiceTopic,
     mainStageTasks: data.mainStageTasks,
+    supervisorUrfuName: data.supervisorUrfuName,
     reviewActivities: data.reviewActivities,
     reviewCharacteristic: data.reviewCharacteristic,
     reviewEmployed: data.reviewEmployed,
@@ -115,6 +119,7 @@ function toStudentDocumentFields(data: {
   specialty: string | null;
   practiceTopic: string | null;
   mainStageTasks: string | null;
+  supervisorUrfuName: string | null;
   reviewActivities: string | null;
   reviewCharacteristic: string | null;
   reviewEmployed: string | null;
@@ -134,6 +139,7 @@ function toStudentDocumentFields(data: {
     specialty: data.specialty,
     practiceTopic: data.practiceTopic,
     mainStageTasks: data.mainStageTasks,
+    supervisorUrfuName: data.supervisorUrfuName,
     reviewActivities: data.reviewActivities,
     reviewCharacteristic: data.reviewCharacteristic,
     reviewEmployed: data.reviewEmployed,
@@ -331,6 +337,7 @@ function buildTemplateData(
     specialty: data.specialty ?? "",
     practice_topic: data.practiceTopic ?? "",
     main_stage_tasks: data.mainStageTasks ?? "",
+    supervisor_urfu_name: data.supervisorUrfuName ?? "",
     practice_start: formatDateRu(cohort.practiceStart),
     practice_end: formatDateRu(cohort.practiceEnd),
     review_activities: data.reviewActivities ?? "",
