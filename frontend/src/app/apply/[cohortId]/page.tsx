@@ -20,6 +20,12 @@ import { ApplicationStatusCard } from "@/components/application/application-stat
 import { SurveyForm } from "@/components/application/survey-form";
 import { TestTaskSection } from "@/components/application/test-task-section";
 import {
+  PageContainer,
+  PageHeader,
+  PageLoadingSkeleton,
+} from "@/components/page-shell";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -134,31 +140,29 @@ export default function ApplyPage() {
 
   if (isLoading || isAuthLoading) {
     return (
-      <div className="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center px-4 py-10">
-        <p className="text-muted-foreground text-sm">Загрузка...</p>
-      </div>
+      <PageContainer size="narrow">
+        <PageLoadingSkeleton />
+      </PageContainer>
     );
   }
 
   if (error || !survey) {
     return (
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-10">
-        <p className="text-destructive text-sm">{error ?? "Анкета не найдена"}</p>
-      </div>
+      <PageContainer size="narrow" className="gap-4">
+        <Alert variant="destructive">
+          <AlertDescription>{error ?? "Анкета не найдена"}</AlertDescription>
+        </Alert>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Заявка на практику — {survey.cohort.name}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Приём заявок: {survey.cohort.applicationStart} —{" "}
-          {survey.cohort.applicationEnd}
-        </p>
-      </div>
+    <PageContainer size="narrow" className="gap-8">
+      <PageHeader
+        eyebrow="Заявка на практику"
+        title={survey.cohort.name}
+        description={`Приём заявок: ${survey.cohort.applicationStart} — ${survey.cohort.applicationEnd}`}
+      />
 
       {application ? (
         <div className="space-y-6">
@@ -169,7 +173,7 @@ export default function ApplyPage() {
             submittedAt={application.createdAt}
           />
 
-          <Card>
+          <Card className="bg-card/90 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Ваши ответы</CardTitle>
             </CardHeader>
@@ -189,7 +193,7 @@ export default function ApplyPage() {
           />
         </div>
       ) : (
-        <Card>
+        <Card className="bg-card/90 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Анкета</CardTitle>
             <CardDescription>
@@ -210,6 +214,6 @@ export default function ApplyPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }

@@ -2,9 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FolderOpen, Plus } from "lucide-react";
 import { AdminRoute } from "@/components/admin-route";
+import {
+  EmptyState,
+  PageContainer,
+  PageHeader,
+  PageLoadingSkeleton,
+} from "@/components/page-shell";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -41,77 +50,94 @@ function CohortsPageContent() {
   }, []);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-10">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Когорты</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Выберите когорту для работы с заявками, документами и задачами.
-          </p>
-        </div>
-        <Link href="/admin/cohorts/new" className={cn(buttonVariants())}>
-          Создать когорту
-        </Link>
-      </div>
+    <PageContainer className="gap-8">
+      <PageHeader
+        eyebrow="Администрирование"
+        title="Когорты"
+        description="Выберите поток практики для работы с заявками, документами и задачами."
+        actions={
+          <Link href="/admin/cohorts/new" className={cn(buttonVariants())}>
+            <Plus data-icon="inline-start" />
+            Создать когорту
+          </Link>
+        }
+      />
 
-      {isLoading && (
-        <p className="text-muted-foreground text-sm">Загрузка...</p>
+      {isLoading && <PageLoadingSkeleton />}
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      {error && <p className="text-destructive text-sm">{error}</p>}
-
       {!isLoading && !error && cohorts.length === 0 && (
-        <p className="text-muted-foreground text-sm">
-          Когорт пока нет. Создайте первую, например «2026».
-        </p>
+        <EmptyState
+          icon={FolderOpen}
+          title="Когорт пока нет"
+          description="Создайте первый поток, например «2026»."
+          action={
+            <Link href="/admin/cohorts/new" className={cn(buttonVariants())}>
+              Создать когорту
+            </Link>
+          }
+        />
       )}
 
       {cohorts.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Название</TableHead>
-              <TableHead>Приём заявок</TableHead>
-              <TableHead>Практика</TableHead>
-              <TableHead>Анкета</TableHead>
-              <TableHead>Роли</TableHead>
-              <TableHead>Тест</TableHead>
-              <TableHead className="text-right">Действия</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {cohorts.map((cohort) => (
-              <TableRow key={cohort.id}>
-                <TableCell className="font-medium">{cohort.name}</TableCell>
-                <TableCell>
-                  {cohort.applicationStart} — {cohort.applicationEnd}
-                </TableCell>
-                <TableCell>
-                  {cohort.practiceStart} — {cohort.practiceEnd}
-                </TableCell>
-                <TableCell>{cohort.surveyFieldsCount}</TableCell>
-                <TableCell>{cohort.cohortRolesCount}</TableCell>
-                <TableCell>
-                  {cohort.testTaskPublished ? (
-                    <Badge>Опубликовано</Badge>
-                  ) : (
-                    <Badge variant="secondary">Черновик</Badge>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Link
-                    href={`/admin/cohorts/${cohort.id}`}
-                    className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-                  >
-                    Открыть
-                  </Link>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <Card className="bg-card/90 overflow-hidden backdrop-blur-sm">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Название</TableHead>
+                    <TableHead>Приём заявок</TableHead>
+                    <TableHead>Практика</TableHead>
+                    <TableHead>Анкета</TableHead>
+                    <TableHead>Роли</TableHead>
+                    <TableHead>Тест</TableHead>
+                    <TableHead className="text-right">Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {cohorts.map((cohort) => (
+                    <TableRow key={cohort.id}>
+                      <TableCell className="font-medium">{cohort.name}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {cohort.applicationStart} — {cohort.applicationEnd}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {cohort.practiceStart} — {cohort.practiceEnd}
+                      </TableCell>
+                      <TableCell>{cohort.surveyFieldsCount}</TableCell>
+                      <TableCell>{cohort.cohortRolesCount}</TableCell>
+                      <TableCell>
+                        {cohort.testTaskPublished ? (
+                          <Badge>Опубликовано</Badge>
+                        ) : (
+                          <Badge variant="secondary">Черновик</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link
+                          href={`/admin/cohorts/${cohort.id}`}
+                          className={cn(
+                            buttonVariants({ variant: "outline", size: "sm" })
+                          )}
+                        >
+                          Открыть
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

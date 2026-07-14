@@ -7,6 +7,10 @@ import { ApiError } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import {
+  Alert,
+  AlertDescription,
+} from "@/components/ui/alert";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -62,7 +66,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md bg-card/90 backdrop-blur-sm">
       <CardHeader>
         <CardTitle>{isLogin ? "Вход" : "Регистрация"}</CardTitle>
         <CardDescription>
@@ -98,7 +102,11 @@ export function AuthForm({ mode }: AuthFormProps) {
             />
           </div>
 
-          {error && <p className="text-destructive text-sm">{error}</p>}
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting

@@ -5,6 +5,10 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { ApplicationsTab } from "@/components/cabinet/applications-tab";
 import { DocumentsTab } from "@/components/cabinet/documents-tab";
 import { TasksTab } from "@/components/cabinet/tasks-tab";
+import {
+  PageContainer,
+  PageHeader,
+} from "@/components/page-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApiError } from "@/lib/api";
 import { fetchMyApplications } from "@/lib/api/applications";
@@ -39,22 +43,21 @@ function CabinetContent() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-10">
-      <div className="space-y-1">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Личный кабинет
-        </h1>
-        <p className="text-muted-foreground text-sm">{user.email}</p>
-      </div>
+    <PageContainer className="gap-8">
+      <PageHeader
+        eyebrow="Личный кабинет"
+        title="Рабочее пространство практиканта"
+        description={user.email}
+      />
 
-      <Tabs defaultValue="applications">
-        <TabsList>
+      <Tabs defaultValue="applications" className="gap-6">
+        <TabsList className="h-auto w-full justify-start gap-1 bg-muted/50 p-1 sm:w-auto">
           <TabsTrigger value="applications">Заявки</TabsTrigger>
           <TabsTrigger value="documents">Документы</TabsTrigger>
           <TabsTrigger value="tasks">Задачи</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="applications">
+        <TabsContent value="applications" className="mt-0">
           <ApplicationsTab
             applications={applications}
             isLoading={isLoading}
@@ -62,15 +65,15 @@ function CabinetContent() {
           />
         </TabsContent>
 
-        <TabsContent value="documents">
+        <TabsContent value="documents" className="mt-0">
           <DocumentsTab applications={applications} />
         </TabsContent>
 
-        <TabsContent value="tasks">
+        <TabsContent value="tasks" className="mt-0">
           <TasksTab applications={applications} />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }
 

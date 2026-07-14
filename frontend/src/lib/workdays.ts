@@ -32,12 +32,23 @@ export function generateWorkdays(start: string, end: string): string[] {
   return workdays;
 }
 
+export function formatDateRu(dateStr: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (match) {
+    return `${match[3]}.${match[2]}.${match[1]}`;
+  }
+
+  const date = parseDateOnly(dateStr);
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const year = date.getUTCFullYear();
+  return `${day}.${month}.${year}`;
+}
+
 export function formatDayLabel(dateStr: string): string {
   const date = parseDateOnly(dateStr);
   const labels = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  return `${labels[date.getUTCDay()]} ${day}.${month}`;
+  return `${labels[date.getUTCDay()]} ${formatDateRu(dateStr)}`;
 }
 
 export function formatDateTime(value: string): string {

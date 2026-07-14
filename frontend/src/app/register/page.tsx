@@ -1,12 +1,27 @@
 import { Suspense } from "react";
 import { AuthForm } from "@/components/auth-form";
+import { PageContainer } from "@/components/page-shell";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function AuthFormFallback() {
+  return (
+    <div className="mx-auto w-full max-w-md space-y-4">
+      <Skeleton className="h-8 w-40" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-64 w-full rounded-xl" />
+    </div>
+  );
+}
 
 export default function RegisterPage() {
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-1 items-center justify-center px-4 py-10">
-      <Suspense fallback={<p className="text-muted-foreground text-sm">Загрузка...</p>}>
+    <PageContainer
+      size="narrow"
+      className="flex flex-1 items-center justify-center py-12"
+    >
+      <Suspense fallback={<AuthFormFallback />}>
         <AuthForm mode="register" />
       </Suspense>
-    </div>
+    </PageContainer>
   );
 }

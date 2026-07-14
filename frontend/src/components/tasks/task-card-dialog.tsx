@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import type { TaskCard, TaskCardInput } from "@/lib/types/task";
-import { formatDateTime } from "@/lib/workdays";
+import { formatDateRu, formatDateTime } from "@/lib/workdays";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -104,7 +104,7 @@ export function TaskCardDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="w-[min(100%,32rem)] rounded-xl border bg-background p-0 shadow-lg backdrop:bg-black/50"
+      className="fixed top-1/2 left-1/2 m-0 w-[min(100%-2rem,32rem)] max-h-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-background p-0 shadow-lg backdrop:bg-black/50"
       onClose={onClose}
     >
       <form
@@ -121,7 +121,7 @@ export function TaskCardDialog({
           </h2>
           {date && (
             <p className="text-muted-foreground text-sm">
-              Дата: {new Date(`${date}T00:00:00.000Z`).toLocaleDateString("ru-RU")}
+              Дата: {formatDateRu(date)}
             </p>
           )}
         </div>

@@ -11,7 +11,13 @@ import { CohortForm } from "@/components/admin/cohort-form";
 import { CohortRolesEditor } from "@/components/admin/cohort-roles-editor";
 import { SurveyFieldsEditor } from "@/components/admin/survey-fields-editor";
 import { TestTaskEditor } from "@/components/admin/test-task-editor";
+import {
+  PageContainer,
+  PageHeader,
+  PageLoadingSkeleton,
+} from "@/components/page-shell";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Card,
   CardContent,
@@ -56,85 +62,85 @@ function CohortDetailPageContent() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto flex w-full max-w-5xl flex-1 items-center justify-center px-4 py-10">
-        <p className="text-muted-foreground text-sm">Загрузка...</p>
-      </div>
+      <PageContainer>
+        <PageLoadingSkeleton />
+      </PageContainer>
     );
   }
 
   if (error || !cohort) {
     return (
-      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 py-10">
-        <p className="text-destructive text-sm">{error ?? "Когорта не найдена"}</p>
-        <Link href="/admin/cohorts" className="text-sm underline-offset-4 hover:underline">
-          ← К списку когорт
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-10">
-      <div className="space-y-2">
+      <PageContainer className="gap-4">
+        <Alert variant="destructive">
+          <AlertDescription>{error ?? "Когорта не найдена"}</AlertDescription>
+        </Alert>
         <Link
           href="/admin/cohorts"
           className="text-muted-foreground text-sm underline-offset-4 hover:underline"
         >
           ← К списку когорт
         </Link>
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Когорта {cohort.name}
-          </h1>
-          <Badge variant="secondary">
-            Заявок: {cohort.applicationsCount}
-          </Badge>
-        </div>
-        <p className="text-muted-foreground text-sm">
-          Публичная ссылка на анкету:{" "}
-          <Link
-            href={`/apply/${cohort.id}`}
-            className="text-foreground underline-offset-4 hover:underline"
-          >
-            /apply/{cohort.id}
-          </Link>
-        </p>
-      </div>
+      </PageContainer>
+    );
+  }
 
-      <Tabs defaultValue="applications">
-        <TabsList className="flex h-auto flex-wrap">
+  return (
+    <PageContainer className="gap-8">
+      <PageHeader
+        eyebrow="Администрирование"
+        title={`Когорта ${cohort.name}`}
+        backHref="/admin/cohorts"
+        backLabel="К списку когорт"
+        actions={
+          <Badge variant="secondary">Заявок: {cohort.applicationsCount}</Badge>
+        }
+        description={
+          <>
+            Публичная ссылка на анкету:{" "}
+            <Link
+              href={`/apply/${cohort.id}`}
+              className="text-foreground underline-offset-4 hover:underline"
+            >
+              /apply/{cohort.id}
+            </Link>
+          </>
+        }
+      />
+
+      <Tabs defaultValue="applications" className="gap-6">
+        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 bg-muted/50 p-1 lg:w-auto">
           <TabsTrigger value="applications">Заявки</TabsTrigger>
           <TabsTrigger value="documents">Документы</TabsTrigger>
           <TabsTrigger value="tasks">Задачи</TabsTrigger>
           <TabsTrigger value="cohort">Управление когортой</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="applications">
+        <TabsContent value="applications" className="mt-0">
           <AdminApplicationsTab
             cohortId={cohort.id}
             roles={cohort.cohortRoles}
           />
         </TabsContent>
 
-        <TabsContent value="documents">
+        <TabsContent value="documents" className="mt-0">
           <AdminDocumentsTab cohortId={cohort.id} />
         </TabsContent>
 
-        <TabsContent value="tasks">
+        <TabsContent value="tasks" className="mt-0">
           <AdminTasksTab cohortId={cohort.id} />
         </TabsContent>
 
-        <TabsContent value="cohort">
-          <Tabs defaultValue="settings">
-            <TabsList>
+        <TabsContent value="cohort" className="mt-0">
+          <Tabs defaultValue="settings" className="gap-4">
+            <TabsList className="h-auto flex-wrap bg-muted/40">
               <TabsTrigger value="settings">Настройки</TabsTrigger>
               <TabsTrigger value="survey">Анкета</TabsTrigger>
               <TabsTrigger value="roles">Роли</TabsTrigger>
               <TabsTrigger value="test-task">Тестовое</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="settings">
-              <Card>
+            <TabsContent value="settings" className="mt-0">
+              <Card className="bg-card/90 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle>Основные параметры</CardTitle>
                   <CardDescription>
@@ -164,8 +170,8 @@ function CohortDetailPageContent() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="survey">
-              <Card>
+            <TabsContent value="survey" className="mt-0">
+              <Card className="bg-card/90 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle>Конструктор анкеты</CardTitle>
                   <CardDescription>
@@ -184,8 +190,8 @@ function CohortDetailPageContent() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="roles">
-              <Card>
+            <TabsContent value="roles" className="mt-0">
+              <Card className="bg-card/90 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle>Роли / треки</CardTitle>
                   <CardDescription>
@@ -205,8 +211,8 @@ function CohortDetailPageContent() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="test-task">
-              <Card>
+            <TabsContent value="test-task" className="mt-0">
+              <Card className="bg-card/90 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle>Тестовое задание</CardTitle>
                   <CardDescription>
@@ -225,7 +231,7 @@ function CohortDetailPageContent() {
           </Tabs>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }
 

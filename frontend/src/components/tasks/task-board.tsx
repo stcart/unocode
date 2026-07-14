@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { fetchAdminTaskBoard, fetchTaskBoard, saveTaskCard } from "@/lib/api/tasks";
 import type { TaskBoard, TaskCard } from "@/lib/types/task";
-import { formatDayLabel } from "@/lib/workdays";
+import { formatDateRu, formatDayLabel } from "@/lib/workdays";
 import { TaskCardDialog } from "@/components/tasks/task-card-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -157,8 +157,8 @@ export function TaskBoardView({
         <CardHeader className="gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
             <CardTitle>
-              {board.cohort.name}: {board.cohort.practiceStart} —{" "}
-              {board.cohort.practiceEnd}
+              {board.cohort.name}: {formatDateRu(board.cohort.practiceStart)} —{" "}
+              {formatDateRu(board.cohort.practiceEnd)}
             </CardTitle>
             <CardDescription>
               Неделя {board.weekIndex + 1} из {board.totalWeeks}
