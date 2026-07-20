@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import type { Application } from "@/lib/types/application";
 import type { DocumentContext, StudentDocumentInput } from "@/lib/types/document";
 import {
@@ -121,7 +122,6 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
   const [context, setContext] = useState<DocumentContext | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [generatingType, setGeneratingType] = useState<DocumentType | null>(
@@ -139,7 +139,6 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
   const loadContext = useCallback(async (cohortId: number) => {
     setIsLoading(true);
     setError(null);
-    setSaveMessage(null);
 
     try {
       const data = await fetchDocumentContext(cohortId);
@@ -176,9 +175,6 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
     }
 
     setIsSaving(true);
-    if (!silent) {
-      setSaveMessage(null);
-    }
 
     try {
       const { data } = await saveDocumentFields(
@@ -192,12 +188,13 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
       lastSavedForm.current = savedForm;
 
       if (!silent) {
-        setSaveMessage("Сохранено");
+        toast.success("Данные сохранены");
       }
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Не удалось сохранить данные"
-      );
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось сохранить данные";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
@@ -205,7 +202,6 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
 
   function updateField(key: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [key]: value }));
-    setSaveMessage(null);
   }
 
   async function handleBlur() {
@@ -230,12 +226,14 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
         selectedCohortId
       );
       triggerFileDownload(blob, filename);
+      toast.success("Документ сформирован");
     } catch (err) {
-      setError(
+      const message =
         err instanceof ApiError
           ? err.message
-          : "Не удалось сформировать документ"
-      );
+          : "Не удалось сформировать документ";
+      setError(message);
+      toast.error(message);
     } finally {
       setGeneratingType(null);
     }
@@ -258,11 +256,12 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
     try {
       await uploadReport(selectedCohortId, file);
       await loadContext(selectedCohortId);
-      setSaveMessage("Отчёт загружен");
+      toast.success("Отчёт загружен");
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Не удалось загрузить отчёт"
-      );
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось загрузить отчёт";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsUploading(false);
     }
@@ -343,11 +342,6 @@ export function DocumentsTab({ applications }: DocumentsTabProps) {
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                {saveMessage && (
-                  <span className="text-muted-foreground text-sm">
-                    {saveMessage}
-                  </span>
-                )}
                 <Button
                   size="sm"
                   onClick={() => void handleSaveClick()}

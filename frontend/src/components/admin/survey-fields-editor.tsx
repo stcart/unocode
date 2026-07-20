@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { ApiError } from "@/lib/api";
 import {
   createSurveyField,
@@ -8,6 +9,7 @@ import {
   updateSurveyField,
 } from "@/lib/api/admin";
 import type { SurveyField, SurveyFieldType } from "@/lib/types/cohort";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +45,8 @@ export function SurveyFieldsEditor({
   const [optionsText, setOptionsText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleAdd(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,8 +72,12 @@ export function SurveyFieldsEditor({
       setLabel("");
       setOptionsText("");
       setType("TEXT");
+      toast.success("Поле анкеты добавлено");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось добавить поле");
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось добавить поле";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -77,12 +85,20 @@ export function SurveyFieldsEditor({
 
   async function handleDelete(fieldId: number) {
     setError(null);
+    setIsDeleting(true);
 
     try {
       await deleteSurveyField(cohortId, fieldId);
       onChange(fields.filter((field) => field.id !== fieldId));
+      toast.success("Поле удалено");
+      setPendingDeleteId(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось удалить поле");
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось удалить поле";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -117,8 +133,12 @@ export function SurveyFieldsEditor({
       nextFields[swapIndex] = updatedOtherField.surveyField;
       nextFields.sort((a, b) => a.sortOrder - b.sortOrder);
       onChange(nextFields);
+      toast.success("Порядок полей обновлён");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось изменить порядок");
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось изменить порядок";
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -217,7 +237,7 @@ export function SurveyFieldsEditor({
                     type="button"
                     variant="destructive"
                     size="sm"
-                    onClick={() => void handleDelete(field.id)}
+                    onClick={() => setPendingDeleteId(field.id)}
                   >
                     Удалить
                   </Button>
@@ -227,6 +247,19 @@ export function SurveyFieldsEditor({
           </TableBody>
         </Table>
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(open) => !open && setPendingDeleteId(null)}
+        title="Удалить поле анкеты?"
+        description="Ответы кандидатов по этому полю могут остаться в уже поданных заявках."
+        confirmLabel="Удалить"
+        variant="destructive"
+        isLoading={isDeleting}
+        onConfirm={() =>
+          pendingDeleteId !== null ? void handleDelete(pendingDeleteId) : undefined
+        }
+      />
     </div>
   );
 }

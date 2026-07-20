@@ -12,6 +12,37 @@ export function isApplicationPeriodOpen(
   return today >= applicationStart && today <= applicationEnd;
 }
 
+export async function getActiveCohort() {
+  const cohorts = await prisma.cohort.findMany({
+    orderBy: [{ applicationStart: "desc" }, { id: "desc" }],
+  });
+
+  const now = new Date();
+  const active = cohorts.find((cohort) =>
+    isApplicationPeriodOpen(
+      cohort.applicationStart,
+      cohort.applicationEnd,
+      now
+    )
+  );
+
+  if (!active) {
+    return { cohort: null };
+  }
+
+  return {
+    cohort: {
+      id: active.id,
+      name: active.name,
+      applicationStart: formatDateOnly(active.applicationStart),
+      applicationEnd: formatDateOnly(active.applicationEnd),
+      practiceStart: formatDateOnly(active.practiceStart),
+      practiceEnd: formatDateOnly(active.practiceEnd),
+      isApplicationOpen: true,
+    },
+  };
+}
+
 export async function getPublicSurvey(cohortId: number) {
   parseCohortId(String(cohortId));
 

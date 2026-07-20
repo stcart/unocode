@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { ApiError } from "@/lib/api";
 import {
   publishTestTask,
@@ -8,6 +9,7 @@ import {
   unpublishTestTask,
 } from "@/lib/api/admin";
 import type { TestTask } from "@/lib/types/cohort";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -28,6 +30,9 @@ export function TestTaskEditor({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<
+    "publish" | "unpublish" | null
+  >(null);
 
   async function handleSave(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,8 +42,12 @@ export function TestTaskEditor({
     try {
       const { testTask: savedTask } = await saveTestTask(cohortId, content);
       onChange(savedTask);
+      toast.success("Текст задания сохранён");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось сохранить задание");
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось сохранить задание";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
@@ -51,8 +60,13 @@ export function TestTaskEditor({
     try {
       const { testTask: publishedTask } = await publishTestTask(cohortId);
       onChange(publishedTask);
+      toast.success("Тестовое задание опубликовано");
+      setConfirmAction(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось опубликовать");
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось опубликовать";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsPublishing(false);
     }
@@ -65,8 +79,13 @@ export function TestTaskEditor({
     try {
       const { testTask: unpublishedTask } = await unpublishTestTask(cohortId);
       onChange(unpublishedTask);
+      toast.success("Публикация снята");
+      setConfirmAction(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось снять с публикации");
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось снять с публикации";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsPublishing(false);
     }
@@ -113,7 +132,7 @@ export function TestTaskEditor({
               type="button"
               variant="outline"
               disabled={isPublishing}
-              onClick={() => void handleUnpublish()}
+              onClick={() => setConfirmAction("unpublish")}
             >
               Снять с публикации
             </Button>
@@ -122,7 +141,7 @@ export function TestTaskEditor({
               type="button"
               variant="secondary"
               disabled={isPublishing || !testTask}
-              onClick={() => void handlePublish()}
+              onClick={() => setConfirmAction("publish")}
             >
               {isPublishing ? "Публикация..." : "Опубликовать"}
             </Button>
@@ -130,10 +149,26 @@ export function TestTaskEditor({
         </div>
       </form>
 
-      <p className="text-muted-foreground text-sm">
-        Кандидаты увидят задание только после отправки анкеты (Этап 4).
-        При публикации на backend пишется заглушка email-уведомления в консоль.
-      </p>
+      <ConfirmDialog
+        open={confirmAction === "publish"}
+        onOpenChange={(open) => !open && setConfirmAction(null)}
+        title="Опубликовать тестовое задание?"
+        description="Кандидаты с поданными анкетами смогут увидеть текст задания."
+        confirmLabel="Опубликовать"
+        isLoading={isPublishing}
+        onConfirm={handlePublish}
+      />
+
+      <ConfirmDialog
+        open={confirmAction === "unpublish"}
+        onOpenChange={(open) => !open && setConfirmAction(null)}
+        title="Снять задание с публикации?"
+        description="Кандидаты временно не смогут открыть текст задания."
+        confirmLabel="Снять с публикации"
+        variant="destructive"
+        isLoading={isPublishing}
+        onConfirm={handleUnpublish}
+      />
     </div>
   );
 }

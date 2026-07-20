@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { ApiError } from "@/lib/api";
 import {
   createCohortRole,
@@ -8,6 +9,7 @@ import {
   updateCohortRole,
 } from "@/lib/api/admin";
 import type { CohortRole } from "@/lib/types/cohort";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +30,8 @@ export function CohortRolesEditor({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingRoleId, setEditingRoleId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleAdd(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,8 +42,12 @@ export function CohortRolesEditor({
       const { role } = await createCohortRole(cohortId, name);
       onChange([...roles, role]);
       setName("");
+      toast.success("Роль добавлена");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось добавить роль");
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось добавить роль";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -53,19 +61,31 @@ export function CohortRolesEditor({
       onChange(roles.map((item) => (item.id === roleId ? role : item)));
       setEditingRoleId(null);
       setEditingName("");
+      toast.success("Роль сохранена");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось сохранить роль");
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось сохранить роль";
+      setError(message);
+      toast.error(message);
     }
   }
 
   async function handleDelete(roleId: number) {
     setError(null);
+    setIsDeleting(true);
 
     try {
       await deleteCohortRole(cohortId, roleId);
       onChange(roles.filter((role) => role.id !== roleId));
+      toast.success("Роль удалена");
+      setPendingDeleteId(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Не удалось удалить роль");
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось удалить роль";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -146,7 +166,7 @@ export function CohortRolesEditor({
                       type="button"
                       size="sm"
                       variant="destructive"
-                      onClick={() => void handleDelete(role.id)}
+                      onClick={() => setPendingDeleteId(role.id)}
                     >
                       Удалить
                     </Button>
@@ -157,6 +177,19 @@ export function CohortRolesEditor({
           ))}
         </ul>
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(open) => !open && setPendingDeleteId(null)}
+        title="Удалить роль?"
+        description="Роль будет снята с кандидатов, которым она была назначена."
+        confirmLabel="Удалить"
+        variant="destructive"
+        isLoading={isDeleting}
+        onConfirm={() =>
+          pendingDeleteId !== null ? void handleDelete(pendingDeleteId) : undefined
+        }
+      />
     </div>
   );
 }

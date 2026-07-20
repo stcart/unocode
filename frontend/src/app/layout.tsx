@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { AppToaster } from "@/components/app-toaster";
 import { AuthProvider } from "@/providers/auth-provider";
 import "./globals.css";
 
@@ -31,6 +32,7 @@ export default function RootLayout({
           <SiteHeader />
           <main className="surface-grid flex flex-1 flex-col">{children}</main>
           <SiteFooter />
+          <AppToaster />
         </AuthProvider>
       </body>
     </html>

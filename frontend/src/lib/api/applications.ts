@@ -1,10 +1,17 @@
 import { apiFetch } from "@/lib/api";
 import type {
+  ActiveCohortResponse,
   Application,
   ApplicationAnswerInput,
   PublicSurveyResponse,
   TestTaskState,
 } from "@/lib/types/application";
+
+export async function fetchActiveCohort(): Promise<ActiveCohortResponse> {
+  return apiFetch<ActiveCohortResponse>("/public/cohorts/active", {
+    cache: "no-store",
+  });
+}
 
 export async function fetchPublicSurvey(
   cohortId: number

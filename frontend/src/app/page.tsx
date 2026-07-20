@@ -1,12 +1,11 @@
-import Link from "next/link";
 import {
   ClipboardList,
   FileText,
   LayoutGrid,
-  ArrowRight,
 } from "lucide-react";
 import { PageContainer } from "@/components/page-shell";
-import { buttonVariants } from "@/components/ui/button";
+import { ActiveCohortBanner } from "@/components/active-cohort-banner";
+import { HomeHeroActions } from "@/components/home-hero-actions";
 import {
   Card,
   CardContent,
@@ -14,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 const FEATURES = [
   {
@@ -40,6 +38,8 @@ const FEATURES = [
 export default function Home() {
   return (
     <PageContainer className="gap-12">
+      <ActiveCohortBanner />
+
       <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
         <div className="space-y-5">
           <p className="text-muted-foreground text-xs font-medium tracking-[0.14em] uppercase">
@@ -54,18 +54,7 @@ export default function Home() {
               выполнения задач в рамках производственной практики.
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/login" className={cn(buttonVariants({ size: "lg" }))}>
-              Войти в систему
-              <ArrowRight data-icon="inline-end" />
-            </Link>
-            <Link
-              href="/cabinet"
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
-            >
-              Личный кабинет
-            </Link>
-          </div>
+          <HomeHeroActions />
         </div>
 
         <Card className="bg-card/80 backdrop-blur-sm">

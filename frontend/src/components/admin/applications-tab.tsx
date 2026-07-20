@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { applicationStatusVariants } from "@/lib/application-status";
 import { ApiError } from "@/lib/api";
 import { fetchCohortApplications, reviewApplication } from "@/lib/api/admin";
 import type { AdminApplication } from "@/lib/types/admin";
 import type { CohortRole } from "@/lib/types/cohort";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +50,7 @@ export function AdminApplicationsTab({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [confirmRejectOpen, setConfirmRejectOpen] = useState(false);
 
   const selected = applications.find(
     (application) => application.id === selectedId
@@ -77,7 +80,8 @@ export function AdminApplicationsTab({
 
   async function handleReview(
     applicationId: number,
-    input: Parameters<typeof reviewApplication>[2]
+    input: Parameters<typeof reviewApplication>[2],
+    successMessage?: string
   ) {
     setIsSaving(true);
     setError(null);
@@ -94,13 +98,33 @@ export function AdminApplicationsTab({
         )
       );
       setRejectComment("");
+      if (successMessage) {
+        toast.success(successMessage);
+      }
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Не удалось обновить заявку"
-      );
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось обновить заявку";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
+  }
+
+  async function confirmReject() {
+    if (!selected) {
+      return;
+    }
+
+    await handleReview(
+      selected.id,
+      {
+        status: "REJECTED",
+        reviewComment: rejectComment,
+      },
+      "Заявка отклонена"
+    );
+    setConfirmRejectOpen(false);
   }
 
   if (isLoading) {
@@ -185,7 +209,7 @@ export function AdminApplicationsTab({
                 <Button
                   disabled={isSaving}
                   onClick={() =>
-                    void handleReview(selected.id, { status: "APPROVED" })
+                    void handleReview(selected.id, { status: "APPROVED" }, "Заявка одобрена")
                   }
                 >
                   Одобрить
@@ -208,12 +232,7 @@ export function AdminApplicationsTab({
                   <Button
                     variant="destructive"
                     disabled={isSaving}
-                    onClick={() =>
-                      void handleReview(selected.id, {
-                        status: "REJECTED",
-                        reviewComment: rejectComment,
-                      })
-                    }
+                    onClick={() => setConfirmRejectOpen(true)}
                   >
                     Отклонить
                   </Button>
@@ -237,9 +256,11 @@ export function AdminApplicationsTab({
                   <Select
                     value={selected.roleId?.toString() ?? ""}
                     onValueChange={(value) =>
-                      void handleReview(selected.id, {
-                        roleId: Number(value),
-                      })
+                      void handleReview(
+                        selected.id,
+                        { roleId: Number(value) },
+                        "Роль назначена"
+                      )
                     }
                   >
                     <SelectTrigger className="w-[220px]">
@@ -264,6 +285,17 @@ export function AdminApplicationsTab({
           </CardContent>
         </Card>
       )}
+
+      <ConfirmDialog
+        open={confirmRejectOpen}
+        onOpenChange={setConfirmRejectOpen}
+        title="Отклонить заявку?"
+        description="Кандидат увидит ваш комментарий в личном кабинете."
+        confirmLabel="Отклонить"
+        variant="destructive"
+        isLoading={isSaving}
+        onConfirm={confirmReject}
+      />
     </div>
   );
 }

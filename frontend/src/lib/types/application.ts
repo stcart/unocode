@@ -23,6 +23,12 @@ export type PublicSurveyResponse = {
   surveyFields: PublicSurveyField[];
 };
 
+export type ActiveCohort = PublicSurveyResponse["cohort"];
+
+export type ActiveCohortResponse = {
+  cohort: ActiveCohort | null;
+};
+
 export type ApplicationAnswer = {
   surveyFieldId: number;
   label: string;

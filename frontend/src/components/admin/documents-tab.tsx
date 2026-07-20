@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { ApiError } from "@/lib/api";
 import {
   fetchCohortDocuments,
@@ -151,10 +152,12 @@ export function AdminDocumentsTab({ cohortId }: AdminDocumentsTabProps) {
       await saveStudentReview(cohortId, selectedUserId, reviewForm);
       await loadStudents();
       await openStudent(selectedUserId);
+      toast.success("Отзыв сохранён");
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Не удалось сохранить отзыв"
-      );
+      const message =
+        err instanceof ApiError ? err.message : "Не удалось сохранить отзыв";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
@@ -172,12 +175,18 @@ export function AdminDocumentsTab({ cohortId }: AdminDocumentsTabProps) {
       await setReportApproval(cohortId, selectedUserId, approved);
       await loadStudents();
       await openStudent(selectedUserId);
+      toast.success(
+        approved
+          ? "Практикант допущен к титульному листу"
+          : "Допуск к титульному листу отменён"
+      );
     } catch (err) {
-      setError(
+      const message =
         err instanceof ApiError
           ? err.message
-          : "Не удалось обновить допуск к титульному листу"
-      );
+          : "Не удалось обновить допуск к титульному листу";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }
