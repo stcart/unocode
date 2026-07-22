@@ -10,6 +10,13 @@ import type {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -97,22 +104,26 @@ export function SurveyForm({
               rows={4}
             />
           ) : field.type === "SELECT" ? (
-            <select
-              id={`field-${field.id}`}
+            <Select
               value={values[field.id] ?? ""}
-              onChange={(event) => updateValue(field.id, event.target.value)}
+              onValueChange={(value) => {
+                if (value) {
+                  updateValue(field.id, value);
+                }
+              }}
               required
-              className="border-input bg-background flex h-9 w-full rounded-lg border px-3 text-sm"
             >
-              <option value="" disabled>
-                Выберите вариант
-              </option>
-              {field.options.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id={`field-${field.id}`} className="w-full">
+                <SelectValue placeholder="Выберите вариант" />
+              </SelectTrigger>
+              <SelectContent>
+                {field.options.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           ) : (
             <Input
               id={`field-${field.id}`}

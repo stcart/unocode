@@ -29,15 +29,33 @@ import {
 import { asyncHandler } from "../middleware/async.middleware";
 import { requireAdmin } from "../middleware/admin.middleware";
 import { requireAuth } from "../middleware/auth.middleware";
+import { validateBody } from "../middleware/validate.middleware";
+import {
+  AdminReviewBodySchema,
+  CohortBodySchema,
+  CohortRoleBodySchema,
+  ReportApprovalBodySchema,
+  ReviewApplicationBodySchema,
+  SurveyFieldBodySchema,
+  TestTaskContentBodySchema,
+} from "../schemas/admin.schemas";
 
 const router = Router();
 
 router.use(requireAuth, requireAdmin);
 
 router.get("/admin/cohorts", asyncHandler(getCohorts));
-router.post("/admin/cohorts", asyncHandler(postCohort));
+router.post(
+  "/admin/cohorts",
+  validateBody(CohortBodySchema),
+  asyncHandler(postCohort)
+);
 router.get("/admin/cohorts/:cohortId", asyncHandler(getCohort));
-router.put("/admin/cohorts/:cohortId", asyncHandler(putCohort));
+router.put(
+  "/admin/cohorts/:cohortId",
+  validateBody(CohortBodySchema),
+  asyncHandler(putCohort)
+);
 
 router.get(
   "/admin/cohorts/:cohortId/survey-fields",
@@ -45,10 +63,12 @@ router.get(
 );
 router.post(
   "/admin/cohorts/:cohortId/survey-fields",
+  validateBody(SurveyFieldBodySchema),
   asyncHandler(postSurveyField)
 );
 router.put(
   "/admin/cohorts/:cohortId/survey-fields/:fieldId",
+  validateBody(SurveyFieldBodySchema),
   asyncHandler(putSurveyField)
 );
 router.delete(
@@ -57,9 +77,14 @@ router.delete(
 );
 
 router.get("/admin/cohorts/:cohortId/roles", asyncHandler(getRoles));
-router.post("/admin/cohorts/:cohortId/roles", asyncHandler(postRole));
+router.post(
+  "/admin/cohorts/:cohortId/roles",
+  validateBody(CohortRoleBodySchema),
+  asyncHandler(postRole)
+);
 router.put(
   "/admin/cohorts/:cohortId/roles/:roleId",
+  validateBody(CohortRoleBodySchema),
   asyncHandler(putRole)
 );
 router.delete(
@@ -73,6 +98,7 @@ router.get(
 );
 router.put(
   "/admin/cohorts/:cohortId/test-task",
+  validateBody(TestTaskContentBodySchema),
   asyncHandler(putCohortTestTask)
 );
 router.post(
@@ -94,6 +120,7 @@ router.get(
 );
 router.patch(
   "/admin/cohorts/:cohortId/applications/:applicationId",
+  validateBody(ReviewApplicationBodySchema),
   asyncHandler(patchCohortApplication)
 );
 
@@ -107,10 +134,12 @@ router.get(
 );
 router.put(
   "/admin/cohorts/:cohortId/documents/:userId/review",
+  validateBody(AdminReviewBodySchema),
   asyncHandler(putCohortStudentReview)
 );
 router.patch(
   "/admin/cohorts/:cohortId/documents/:userId/report-approval",
+  validateBody(ReportApprovalBodySchema),
   asyncHandler(patchCohortReportApproval)
 );
 router.get(

@@ -2,12 +2,7 @@ import type { ApplicationStatus } from "@prisma/client";
 import { prisma } from "./prisma.service";
 import { AppError } from "../utils/app-error";
 import { ensureCohortExists } from "./cohort.service";
-
-const statusLabels: Record<ApplicationStatus, string> = {
-  PENDING: "На рассмотрении",
-  APPROVED: "Одобрена",
-  REJECTED: "Отклонена",
-};
+import { serializeAdminApplication } from "./serializers/application.serializer";
 
 const applicationInclude = {
   user: {
@@ -26,44 +21,6 @@ const applicationInclude = {
   },
 } as const;
 
-function serializeApplication(application: {
-  id: number;
-  userId: number;
-  cohortId: number;
-  status: ApplicationStatus;
-  reviewComment: string | null;
-  roleId: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-  user: { id: number; email: string };
-  role: { id: number; name: string } | null;
-  answers: Array<{
-    surveyFieldId: number;
-    value: string;
-    surveyField: { label: string; type: string };
-  }>;
-}) {
-  return {
-    id: application.id,
-    userId: application.userId,
-    cohortId: application.cohortId,
-    status: application.status,
-    statusLabel: statusLabels[application.status],
-    reviewComment: application.reviewComment,
-    roleId: application.roleId,
-    createdAt: application.createdAt.toISOString(),
-    updatedAt: application.updatedAt.toISOString(),
-    user: application.user,
-    role: application.role,
-    answers: application.answers.map((answer) => ({
-      surveyFieldId: answer.surveyFieldId,
-      label: answer.surveyField.label,
-      type: answer.surveyField.type,
-      value: answer.value,
-    })),
-  };
-}
-
 export async function listCohortApplications(cohortId: number) {
   await ensureCohortExists(cohortId);
 
@@ -73,7 +30,7 @@ export async function listCohortApplications(cohortId: number) {
     orderBy: { createdAt: "desc" },
   });
 
-  return applications.map(serializeApplication);
+  return applications.map(serializeAdminApplication);
 }
 
 export async function getCohortApplication(
@@ -91,7 +48,7 @@ export async function getCohortApplication(
     throw new AppError(404, "Заявка не найдена");
   }
 
-  return serializeApplication(application);
+  return serializeAdminApplication(application);
 }
 
 export async function reviewCohortApplication(
@@ -169,5 +126,5 @@ export async function reviewCohortApplication(
     include: applicationInclude,
   });
 
-  return serializeApplication(updated);
+  return serializeAdminApplication(updated);
 }

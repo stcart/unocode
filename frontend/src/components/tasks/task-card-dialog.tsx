@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import type { TaskCard, TaskCardInput } from "@/lib/types/task";
 import { formatDateRu, formatDateTime } from "@/lib/workdays";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,25 +51,9 @@ export function TaskCardDialog({
   onSave,
   onSaveRequest,
 }: TaskCardDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) {
-      return;
-    }
-
-    if (open && !dialog.open) {
-      dialog.showModal();
-    }
-
-    if (!open && dialog.open) {
-      dialog.close();
-    }
-  }, [open]);
 
   useEffect(() => {
     if (!open) {
@@ -76,7 +68,9 @@ export function TaskCardDialog({
     setError(null);
   }, [open, card]);
 
-  async function handleSubmit() {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
     if (!date || !canEdit) {
       return;
     }
@@ -102,93 +96,84 @@ export function TaskCardDialog({
   }
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="fixed top-1/2 left-1/2 m-0 w-[min(100%-2rem,32rem)] max-h-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-background p-0 shadow-lg backdrop:bg-black/50"
-      onClose={onClose}
-    >
-      <form
-        method="dialog"
-        className="flex flex-col gap-4 p-6"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void handleSubmit();
-        }}
-      >
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold">
-            {canEdit ? "Карточка задачи" : "Просмотр карточки"}
-          </h2>
-          {date && (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <DialogContent className="sm:max-w-lg" showCloseButton={false}>
+        <form className="grid gap-4" onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>
+              {canEdit ? "Карточка задачи" : "Просмотр карточки"}
+            </DialogTitle>
+            {date && (
+              <DialogDescription>
+                Дата: {formatDateRu(date)}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <Label htmlFor="task-title">Название / описание задачи</Label>
+            <Input
+              id="task-title"
+              value={form.title}
+              disabled={!canEdit || isSaving}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, title: event.target.value }))
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="task-description">Что было сделано</Label>
+            <Textarea
+              id="task-description"
+              rows={4}
+              value={form.description}
+              disabled={!canEdit || isSaving}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  description: event.target.value,
+                }))
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="task-artifact">Ссылка на артефакт</Label>
+            <Input
+              id="task-artifact"
+              value={form.artifactLink}
+              disabled={!canEdit || isSaving}
+              placeholder="GitHub, Figma, скриншот..."
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  artifactLink: event.target.value,
+                }))
+              }
+            />
+          </div>
+
+          {card?.updatedAt && (
             <p className="text-muted-foreground text-sm">
-              Дата: {formatDateRu(date)}
+              Обновлено: {formatDateTime(card.updatedAt)}
             </p>
           )}
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="task-title">Название / описание задачи</Label>
-          <Input
-            id="task-title"
-            value={form.title}
-            disabled={!canEdit || isSaving}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, title: event.target.value }))
-            }
-          />
-        </div>
+          {error && <p className="text-destructive text-sm">{error}</p>}
 
-        <div className="space-y-2">
-          <Label htmlFor="task-description">Что было сделано</Label>
-          <Textarea
-            id="task-description"
-            rows={4}
-            value={form.description}
-            disabled={!canEdit || isSaving}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                description: event.target.value,
-              }))
-            }
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="task-artifact">Ссылка на артефакт</Label>
-          <Input
-            id="task-artifact"
-            value={form.artifactLink}
-            disabled={!canEdit || isSaving}
-            placeholder="GitHub, Figma, скриншот..."
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                artifactLink: event.target.value,
-              }))
-            }
-          />
-        </div>
-
-        {card?.updatedAt && (
-          <p className="text-muted-foreground text-sm">
-            Обновлено: {formatDateTime(card.updatedAt)}
-          </p>
-        )}
-
-        {error && <p className="text-destructive text-sm">{error}</p>}
-
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Закрыть
-          </Button>
-          {canEdit && (
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Сохранение..." : "Сохранить"}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Закрыть
             </Button>
-          )}
-        </div>
-      </form>
-    </dialog>
+            {canEdit && (
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? "Сохранение..." : "Сохранить"}
+              </Button>
+            )}
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

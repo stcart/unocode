@@ -1,6 +1,7 @@
 import { prisma } from "./prisma.service";
 import { AppError } from "../utils/app-error";
 import { ensureCohortExists } from "./cohort.service";
+import { sendTestTaskPublishedEmails } from "./email.service";
 
 function serializeTestTask(
   task: {
@@ -73,9 +74,23 @@ export async function publishTestTask(cohortId: number) {
     },
   });
 
-  console.log(
-    `[email stub] Тестовое задание опубликовано для когорты ${cohortId}`
-  );
+  const [cohort, applications] = await Promise.all([
+    prisma.cohort.findUnique({
+      where: { id: cohortId },
+      select: { name: true },
+    }),
+    prisma.application.findMany({
+      where: { cohortId },
+      select: {
+        user: { select: { email: true } },
+      },
+    }),
+  ]);
+
+  await sendTestTaskPublishedEmails({
+    cohortName: cohort?.name ?? `Когорта ${cohortId}`,
+    recipients: applications.map((application) => application.user.email),
+  });
 
   return serializeTestTask(task);
 }

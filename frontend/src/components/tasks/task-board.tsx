@@ -8,6 +8,7 @@ import { formatDateRu, formatDayLabel } from "@/lib/workdays";
 import { TaskCardDialog } from "@/components/tasks/task-card-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -208,17 +210,19 @@ export function TaskBoardView({
 
         {mode === "student" && (
           <CardContent>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="show-all-participants"
                 checked={showAll}
-                onChange={(event) => {
-                  setShowAll(event.target.checked);
+                onCheckedChange={(checked) => {
+                  setShowAll(checked === true);
                   setWeekStart(undefined);
                 }}
               />
-              Показать всех
-            </label>
+              <Label htmlFor="show-all-participants" className="text-sm font-normal">
+                Показать всех
+              </Label>
+            </div>
           </CardContent>
         )}
       </Card>

@@ -5,49 +5,12 @@ import {
   getPublicSurvey,
   isApplicationPeriodOpen,
 } from "./public-cohort.service";
+import { serializeStudentApplication } from "./serializers/application.serializer";
 
 export type ApplicationAnswerInput = {
   surveyFieldId: number;
   value: string;
 };
-
-const statusLabels: Record<ApplicationStatus, string> = {
-  PENDING: "На рассмотрении",
-  APPROVED: "Одобрена",
-  REJECTED: "Отклонена",
-};
-
-function serializeApplication(application: {
-  id: number;
-  cohortId: number;
-  status: ApplicationStatus;
-  reviewComment: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  cohort: { id: number; name: string };
-  answers: Array<{
-    surveyFieldId: number;
-    value: string;
-    surveyField: { label: string; type: string };
-  }>;
-}) {
-  return {
-    id: application.id,
-    cohortId: application.cohortId,
-    status: application.status,
-    statusLabel: statusLabels[application.status],
-    reviewComment: application.reviewComment,
-    createdAt: application.createdAt.toISOString(),
-    updatedAt: application.updatedAt.toISOString(),
-    cohort: application.cohort,
-    answers: application.answers.map((answer) => ({
-      surveyFieldId: answer.surveyFieldId,
-      label: answer.surveyField.label,
-      type: answer.surveyField.type,
-      value: answer.value,
-    })),
-  };
-}
 
 const applicationInclude = {
   cohort: {
@@ -69,7 +32,7 @@ export async function listUserApplications(userId: number) {
     orderBy: { createdAt: "desc" },
   });
 
-  return applications.map(serializeApplication);
+  return applications.map(serializeStudentApplication);
 }
 
 export async function getUserApplicationForCohort(
@@ -87,7 +50,7 @@ export async function getUserApplicationForCohort(
     return null;
   }
 
-  return serializeApplication(application);
+  return serializeStudentApplication(application);
 }
 
 export async function getPrefillDefaults(userId: number, cohortId: number) {
@@ -237,7 +200,7 @@ export async function submitApplication(
     throw new AppError(500, "Не удалось создать заявку");
   }
 
-  return serializeApplication(application);
+  return serializeStudentApplication(application);
 }
 
 export async function getApplicantTestTask(userId: number, cohortId: number) {

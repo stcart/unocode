@@ -3,150 +3,17 @@ import path from "node:path";
 import { prisma } from "./prisma.service";
 import { AppError } from "../utils/app-error";
 import { ensureCohortExists } from "./cohort.service";
+import { trimOrNull } from "../utils/string";
+import { inferFioFromAnswers } from "../utils/survey-answers";
 import {
-  areStudentFieldsComplete,
-  type StudentDocumentFields,
-} from "../utils/can-generate";
-import type { DocumentType } from "../utils/document.constants";
-import { DOCUMENT_TYPES } from "../utils/document.constants";
+  computeReviewComplete,
+  computeStudentFieldCompletion,
+  emptyStudentDocumentFields,
+  serializeAdminDocumentData,
+  toStudentDocumentFields,
+} from "./serializers/document.serializer";
 
 const projectRoot = path.join(__dirname, "..", "..");
-
-function trimOrNull(value: string | null | undefined): string | null {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
-
-function toStudentDocumentFields(data: {
-  studentFio: string | null;
-  group: string | null;
-  directionCode: string | null;
-  directionName: string | null;
-  programName: string | null;
-  specialty: string | null;
-  practiceTopic: string | null;
-  mainStageTasks: string | null;
-  supervisorUrfuName: string | null;
-  reviewActivities: string | null;
-  reviewCharacteristic: string | null;
-  reviewEmployed: string | null;
-  reviewNextPractice: string | null;
-  reviewEmploymentOffer: string | null;
-  reviewSuggestions: string | null;
-  reviewGrade: string | null;
-  reportFileUrl: string | null;
-  reportAdminApproved: boolean;
-}): StudentDocumentFields {
-  return {
-    studentFio: data.studentFio,
-    group: data.group,
-    directionCode: data.directionCode,
-    directionName: data.directionName,
-    programName: data.programName,
-    specialty: data.specialty,
-    practiceTopic: data.practiceTopic,
-    mainStageTasks: data.mainStageTasks,
-    supervisorUrfuName: data.supervisorUrfuName,
-    reviewActivities: data.reviewActivities,
-    reviewCharacteristic: data.reviewCharacteristic,
-    reviewEmployed: data.reviewEmployed,
-    reviewNextPractice: data.reviewNextPractice,
-    reviewEmploymentOffer: data.reviewEmploymentOffer,
-    reviewSuggestions: data.reviewSuggestions,
-    reviewGrade: data.reviewGrade,
-    reportFileUrl: data.reportFileUrl,
-    reportAdminApproved: data.reportAdminApproved,
-  };
-}
-
-function inferFioFromAnswers(
-  answers: Array<{ value: string; surveyField: { label: string } }>
-): string | null {
-  for (const answer of answers) {
-    const label = answer.surveyField.label.trim().toLowerCase();
-    if (label.includes("фио") || label === "ф.и.о.") {
-      return answer.value.trim() || null;
-    }
-  }
-  return null;
-}
-
-function serializeDocumentData(data: {
-  id: number;
-  userId: number;
-  cohortId: number;
-  studentFio: string | null;
-  group: string | null;
-  directionCode: string | null;
-  directionName: string | null;
-  programName: string | null;
-  specialty: string | null;
-  practiceTopic: string | null;
-  mainStageTasks: string | null;
-  supervisorUrfuName: string | null;
-  reviewActivities: string | null;
-  reviewCharacteristic: string | null;
-  reviewEmployed: string | null;
-  reviewNextPractice: string | null;
-  reviewEmploymentOffer: string | null;
-  reviewSuggestions: string | null;
-  reviewGrade: string | null;
-  reportFileUrl: string | null;
-  reportAdminApproved: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}) {
-  const fields = toStudentDocumentFields(data);
-  const studentFieldCompletion = Object.fromEntries(
-    DOCUMENT_TYPES.map((type) => [
-      type,
-      areStudentFieldsComplete(type, fields),
-    ])
-  ) as Record<DocumentType, boolean>;
-
-  const reviewComplete = [
-    data.reviewActivities,
-    data.reviewCharacteristic,
-    data.reviewEmployed,
-    data.reviewNextPractice,
-    data.reviewEmploymentOffer,
-    data.reviewSuggestions,
-    data.reviewGrade,
-  ].every((value) => typeof value === "string" && value.trim().length > 0);
-
-  return {
-    id: data.id,
-    userId: data.userId,
-    cohortId: data.cohortId,
-    studentFio: data.studentFio,
-    group: data.group,
-    directionCode: data.directionCode,
-    directionName: data.directionName,
-    programName: data.programName,
-    specialty: data.specialty,
-    practiceTopic: data.practiceTopic,
-    mainStageTasks: data.mainStageTasks,
-    supervisorUrfuName: data.supervisorUrfuName,
-    reviewActivities: data.reviewActivities,
-    reviewCharacteristic: data.reviewCharacteristic,
-    reviewEmployed: data.reviewEmployed,
-    reviewNextPractice: data.reviewNextPractice,
-    reviewEmploymentOffer: data.reviewEmploymentOffer,
-    reviewSuggestions: data.reviewSuggestions,
-    reviewGrade: data.reviewGrade,
-    reportFileUrl: data.reportFileUrl,
-    reportAdminApproved: data.reportAdminApproved,
-    hasReport: Boolean(data.reportFileUrl),
-    reviewComplete,
-    studentFieldCompletion,
-    createdAt: data.createdAt.toISOString(),
-    updatedAt: data.updatedAt.toISOString(),
-  };
-}
 
 async function ensureApprovedParticipant(cohortId: number, userId: number) {
   const application = await prisma.application.findUnique({
@@ -208,45 +75,10 @@ export async function listCohortDocuments(cohortId: number) {
 
     const fields = data
       ? toStudentDocumentFields(data)
-      : ({
-          studentFio: null,
-          group: null,
-          directionCode: null,
-          directionName: null,
-          programName: null,
-          specialty: null,
-          practiceTopic: null,
-          mainStageTasks: null,
-          supervisorUrfuName: null,
-          reviewActivities: null,
-          reviewCharacteristic: null,
-          reviewEmployed: null,
-          reviewNextPractice: null,
-          reviewEmploymentOffer: null,
-          reviewSuggestions: null,
-          reviewGrade: null,
-          reportFileUrl: null,
-          reportAdminApproved: false,
-        } satisfies StudentDocumentFields);
+      : emptyStudentDocumentFields();
 
-    const studentFieldCompletion = Object.fromEntries(
-      DOCUMENT_TYPES.map((type) => [
-        type,
-        areStudentFieldsComplete(type, fields),
-      ])
-    ) as Record<DocumentType, boolean>;
-
-    const reviewComplete = data
-      ? [
-          data.reviewActivities,
-          data.reviewCharacteristic,
-          data.reviewEmployed,
-          data.reviewNextPractice,
-          data.reviewEmploymentOffer,
-          data.reviewSuggestions,
-          data.reviewGrade,
-        ].every((value) => typeof value === "string" && value.trim().length > 0)
-      : false;
+    const studentFieldCompletion = computeStudentFieldCompletion(fields);
+    const reviewComplete = data ? computeReviewComplete(data) : false;
 
     return {
       userId: application.userId,
@@ -288,7 +120,7 @@ export async function getCohortStudentDocument(
     displayName,
     email: application.user.email,
     role: application.role,
-    data: serializeDocumentData(data),
+    data: serializeAdminDocumentData(data),
   };
 }
 
@@ -346,7 +178,7 @@ export async function saveAdminReview(
     data: updateData,
   });
 
-  return serializeDocumentData(updated);
+  return serializeAdminDocumentData(updated);
 }
 
 export async function setReportApproval(
@@ -373,7 +205,7 @@ export async function setReportApproval(
     data: { reportAdminApproved: approved },
   });
 
-  return serializeDocumentData(updated);
+  return serializeAdminDocumentData(updated);
 }
 
 export async function getReportFile(

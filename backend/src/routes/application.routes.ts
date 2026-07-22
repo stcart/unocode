@@ -8,6 +8,8 @@ import {
 } from "../controllers/application.controller";
 import { asyncHandler } from "../middleware/async.middleware";
 import { requireAuth } from "../middleware/auth.middleware";
+import { validateBody } from "../middleware/validate.middleware";
+import { SubmitApplicationBodySchema } from "../schemas/application.schemas";
 
 const router = Router();
 
@@ -22,7 +24,11 @@ router.get(
   "/applications/cohort/:cohortId/prefill",
   asyncHandler(getApplicationPrefill)
 );
-router.post("/applications", asyncHandler(postApplication));
+router.post(
+  "/applications",
+  validateBody(SubmitApplicationBodySchema),
+  asyncHandler(postApplication)
+);
 router.get(
   "/applications/cohort/:cohortId/test-task",
   asyncHandler(getMyTestTask)

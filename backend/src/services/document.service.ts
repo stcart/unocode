@@ -20,6 +20,16 @@ import {
   TEMPLATE_FILES,
 } from "../utils/document.constants";
 import { formatDateOnly } from "../utils/dates";
+import { trimOrNull } from "../utils/string";
+import {
+  inferFioFromAnswers,
+  inferGroupFromAnswers,
+} from "../utils/survey-answers";
+import { validateReportFileContent } from "../utils/file-validation";
+import {
+  serializeStudentDocumentData,
+  toStudentDocumentFields,
+} from "./serializers/document.serializer";
 
 export type StudentDocumentInput = {
   studentFio?: string | null;
@@ -49,109 +59,6 @@ const projectRoot = path.join(__dirname, "..", "..");
 const templatesDir = path.join(projectRoot, "templates");
 const uploadsDir = path.join(projectRoot, "uploads", "reports");
 
-function trimOrNull(value: string | null | undefined): string | null {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
-
-function serializeDocumentData(data: {
-  id: number;
-  userId: number;
-  cohortId: number;
-  studentFio: string | null;
-  group: string | null;
-  directionCode: string | null;
-  directionName: string | null;
-  programName: string | null;
-  specialty: string | null;
-  practiceTopic: string | null;
-  mainStageTasks: string | null;
-  supervisorUrfuName: string | null;
-  reviewActivities: string | null;
-  reviewCharacteristic: string | null;
-  reviewEmployed: string | null;
-  reviewNextPractice: string | null;
-  reviewEmploymentOffer: string | null;
-  reviewSuggestions: string | null;
-  reviewGrade: string | null;
-  reportFileUrl: string | null;
-  reportAdminApproved: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}) {
-  return {
-    id: data.id,
-    userId: data.userId,
-    cohortId: data.cohortId,
-    studentFio: data.studentFio,
-    group: data.group,
-    directionCode: data.directionCode,
-    directionName: data.directionName,
-    programName: data.programName,
-    specialty: data.specialty,
-    practiceTopic: data.practiceTopic,
-    mainStageTasks: data.mainStageTasks,
-    supervisorUrfuName: data.supervisorUrfuName,
-    reviewActivities: data.reviewActivities,
-    reviewCharacteristic: data.reviewCharacteristic,
-    reviewEmployed: data.reviewEmployed,
-    reviewNextPractice: data.reviewNextPractice,
-    reviewEmploymentOffer: data.reviewEmploymentOffer,
-    reviewSuggestions: data.reviewSuggestions,
-    reviewGrade: data.reviewGrade,
-    reportFileUrl: data.reportFileUrl,
-    reportAdminApproved: data.reportAdminApproved,
-    createdAt: data.createdAt.toISOString(),
-    updatedAt: data.updatedAt.toISOString(),
-  };
-}
-
-function toStudentDocumentFields(data: {
-  studentFio: string | null;
-  group: string | null;
-  directionCode: string | null;
-  directionName: string | null;
-  programName: string | null;
-  specialty: string | null;
-  practiceTopic: string | null;
-  mainStageTasks: string | null;
-  supervisorUrfuName: string | null;
-  reviewActivities: string | null;
-  reviewCharacteristic: string | null;
-  reviewEmployed: string | null;
-  reviewNextPractice: string | null;
-  reviewEmploymentOffer: string | null;
-  reviewSuggestions: string | null;
-  reviewGrade: string | null;
-  reportFileUrl: string | null;
-  reportAdminApproved: boolean;
-}): StudentDocumentFields {
-  return {
-    studentFio: data.studentFio,
-    group: data.group,
-    directionCode: data.directionCode,
-    directionName: data.directionName,
-    programName: data.programName,
-    specialty: data.specialty,
-    practiceTopic: data.practiceTopic,
-    mainStageTasks: data.mainStageTasks,
-    supervisorUrfuName: data.supervisorUrfuName,
-    reviewActivities: data.reviewActivities,
-    reviewCharacteristic: data.reviewCharacteristic,
-    reviewEmployed: data.reviewEmployed,
-    reviewNextPractice: data.reviewNextPractice,
-    reviewEmploymentOffer: data.reviewEmploymentOffer,
-    reviewSuggestions: data.reviewSuggestions,
-    reviewGrade: data.reviewGrade,
-    reportFileUrl: data.reportFileUrl,
-    reportAdminApproved: data.reportAdminApproved,
-  };
-}
-
 async function inferPrefillFromApplication(userId: number, cohortId: number) {
   const application = await prisma.application.findUnique({
     where: {
@@ -174,14 +81,14 @@ async function inferPrefillFromApplication(userId: number, cohortId: number) {
 
   const prefill: StudentDocumentInput = {};
 
-  for (const answer of application.answers) {
-    const label = answer.surveyField.label.trim().toLowerCase();
+  const fio = inferFioFromAnswers(application.answers);
+  if (fio) {
+    prefill.studentFio = fio;
+  }
 
-    if (label.includes("фио") || label === "ф.и.о.") {
-      prefill.studentFio ??= answer.value.trim();
-    } else if (label.includes("групп")) {
-      prefill.group ??= answer.value.trim();
-    }
+  const group = inferGroupFromAnswers(application.answers);
+  if (group) {
+    prefill.group = group;
   }
 
   return prefill;
@@ -282,7 +189,7 @@ export async function getDocumentContext(userId: number, cohortId: number) {
       practiceEnd: formatDateOnly(cohort.practiceEnd),
     },
     applicationStatus: application.status,
-    data: serializeDocumentData(data),
+    data: serializeStudentDocumentData(data),
     availability,
     studentFieldCompletion,
   };
@@ -320,7 +227,7 @@ export async function saveStudentDocumentFields(
     data: updateData,
   });
 
-  return serializeDocumentData(updated);
+  return serializeStudentDocumentData(updated);
 }
 
 function buildTemplateData(
@@ -466,11 +373,9 @@ export async function saveReportFile(
     }
   }
 
-  const ext = path.extname(file.originalname).toLowerCase();
+  validateReportFileContent(file.buffer, file.originalname);
 
-  if (ext !== ".pdf" && ext !== ".docx") {
-    throw new AppError(400, "Допустимы только файлы .docx и .pdf");
-  }
+  const ext = path.extname(file.originalname).toLowerCase();
 
   const targetDir = path.join(uploadsDir, String(cohortId), String(userId));
   fs.mkdirSync(targetDir, { recursive: true });
@@ -496,7 +401,7 @@ export async function saveReportFile(
     },
   });
 
-  return serializeDocumentData(updated);
+  return serializeStudentDocumentData(updated);
 }
 
 export function isDocumentType(value: string): value is DocumentType {

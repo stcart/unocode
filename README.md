@@ -69,6 +69,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 | `CORS_ORIGIN`    | Разрешённые origin (через запятую)| `http://localhost:3000`   |
 | `JWT_SECRET`     | Секрет для JWT                    | сменить в production      |
 | `JWT_EXPIRES_IN` | Срок жизни токена                 | `7d`                      |
+| `SMTP_*`         | Почта при публикации тестового задания (опционально) | без SMTP — лог в консоль |
 
 ## Первый администратор
 

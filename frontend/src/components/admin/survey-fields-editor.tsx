@@ -15,6 +15,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -158,16 +165,23 @@ export function SurveyFieldsEditor({
 
         <div className="space-y-2">
           <Label htmlFor="survey-type">Тип поля</Label>
-          <select
-            id="survey-type"
+          <Select
             value={type}
-            onChange={(event) => setType(event.target.value as SurveyFieldType)}
-            className="border-input bg-background flex h-9 w-full rounded-lg border px-3 text-sm"
+            onValueChange={(value) => {
+              if (value) {
+                setType(value as SurveyFieldType);
+              }
+            }}
           >
-            <option value="TEXT">Короткий текст</option>
-            <option value="LONG_TEXT">Длинный текст</option>
-            <option value="SELECT">Выбор из списка</option>
-          </select>
+            <SelectTrigger id="survey-type" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="TEXT">Короткий текст</SelectItem>
+              <SelectItem value="LONG_TEXT">Длинный текст</SelectItem>
+              <SelectItem value="SELECT">Выбор из списка</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {type === "SELECT" && (
